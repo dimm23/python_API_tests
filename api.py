@@ -61,7 +61,7 @@ class Utopia(object):
         self.GENERICFILTER = {"sortBy": "","offset": "", "limit": ""}
 
     #====================
-
+	
     def getExtraInfo(self):
         return self.EXTRAINFO
            #====================  
@@ -340,24 +340,26 @@ class Utopia(object):
         logging.info( u'deleteEmail method call' )
         return self.send_request(data)
     #====================  
-    def sendReplyEmailMessage(self,id,body ): 
+    def sendReplyEmailMessage(self,id,body,subject ): 
         data={"jsonrpc": "2.0",
             "method":"sendReplyEmailMessage",
             "params": {
                 'id' : id,
-                'body' : body                },
+                'body' : body,
+                'subject' : subject                },
             "filter": self.GENERICFILTER
         }
         logging.info( u'sendReplyEmailMessage method call' )
         return self.send_request(data)
     #====================  
-    def sendForwardEmailMessage(self,id,tohex,body ): 
+    def sendForwardEmailMessage(self,id,tohex,body,subject ): 
         data={"jsonrpc": "2.0",
             "method":"sendForwardEmailMessage",
             "params": {
                 'id' : id,
                 'to' : tohex,
-                'body' : body                },
+                'body' : body,
+                'subject' : subject                },
             "filter": self.GENERICFILTER
         }
         logging.info( u'sendForwardEmailMessage method call' )
@@ -441,14 +443,14 @@ class Utopia(object):
         logging.info( u'enableMining method call' )
         return self.send_request(data)
     #====================  
-    def enableInterest(self,enable ): 
+    def enablePoS(self,enable ): 
         data={"jsonrpc": "2.0",
-            "method":"enableInterest",
+            "method":"enablePoS",
             "params": {
                 'enable' : enable                },
             "filter": self.GENERICFILTER
         }
-        logging.info( u'enableInterest method call' )
+        logging.info( u'enablePoS method call' )
         return self.send_request(data)
     #====================  
     def enableHistoryMining(self,enable ): 
@@ -762,6 +764,16 @@ class Utopia(object):
         logging.info( u'leaveChannel method call' )
         return self.send_request(data)
     #====================  
+    def getChannelContacts(self,channelid ): 
+        data={"jsonrpc": "2.0",
+            "method":"getChannelContacts",
+            "params": {
+                'channelid' : channelid                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'getChannelContacts method call' )
+        return self.send_request(data)
+    #====================  
     def getChannelMessages(self,channelid ): 
         data={"jsonrpc": "2.0",
             "method":"getChannelMessages",
@@ -803,44 +815,74 @@ class Utopia(object):
         logging.info( u'getChannelModeratorRight method call' )
         return self.send_request(data)
     #====================  
-    def createChannel(self,channel_name,description,read_only,password,languages,hashtags,geoTag,base64_avatar_image ): 
+    def createChannel(self,channel_name,description,read_only,read_only_privacy,password,languages,hashtags,geoTag,base64_avatar_image,hide_in_UI ): 
         data={"jsonrpc": "2.0",
             "method":"createChannel",
             "params": {
                 'channel_name' : channel_name,
                 'description' : description,
                 'read_only' : read_only,
+                'read_only_privacy' : read_only_privacy,
                 'password' : password,
                 'languages' : languages,
                 'hashtags' : hashtags,
                 'geoTag' : geoTag,
-                'base64_avatar_image' : base64_avatar_image                },
+                'base64_avatar_image' : base64_avatar_image,
+                'hide_in_UI' : hide_in_UI                },
             "filter": self.GENERICFILTER
         }
         logging.info( u'createChannel method call' )
         return self.send_request(data)
     #====================  
-    def modifyChannel(self,channelid,description,read_only,languages,hashtags,geoTag,base64_avatar_image ): 
+    def modifyChannel(self,channelid,description,password,languages,hashtags,geoTag,base64_avatar_image,hide_in_UI ): 
         data={"jsonrpc": "2.0",
             "method":"modifyChannel",
             "params": {
                 'channelid' : channelid,
                 'description' : description,
-                'read_only' : read_only,
+                'password' : password,
                 'languages' : languages,
                 'hashtags' : hashtags,
                 'geoTag' : geoTag,
-                'base64_avatar_image' : base64_avatar_image                },
+                'base64_avatar_image' : base64_avatar_image,
+                'hide_in_UI' : hide_in_UI                },
             "filter": self.GENERICFILTER
         }
         logging.info( u'modifyChannel method call' )
         return self.send_request(data)
     #====================  
-    def deleteChannel(self,channelid ): 
+    def modifyChannelTitle(self,channelid,newTitle,password ): 
+        data={"jsonrpc": "2.0",
+            "method":"modifyChannelTitle",
+            "params": {
+                'channelid' : channelid,
+                'newTitle' : newTitle,
+                'password' : password
+            },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'modifyChannelTitle method call' )
+        return self.send_request(data)
+    #====================  
+    def modifyChannelPassword(self,channelid,newPassword,password ): 
+        data={"jsonrpc": "2.0",
+            "method":"modifyChannelPassword",
+            "params": {
+                'channelid' : channelid,
+                'newPassword' : newPassword,
+                'password' : password
+            },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'modifyChannelPassword method call' )
+        return self.send_request(data)
+    #====================  
+    def deleteChannel(self,channelid,password ): 
         data={"jsonrpc": "2.0",
             "method":"deleteChannel",
             "params": {
-                'channelid' : channelid                },
+                'channelid' : channelid,
+                'password' : password                },
             "filter": self.GENERICFILTER
         }
         logging.info( u'deleteChannel method call' )
@@ -1037,24 +1079,24 @@ class Utopia(object):
         logging.info( u'getWhoIsInfo method call' )
         return self.send_request(data)
     #====================  
-    def requestTreasuryInterestRates(self ): 
+    def requestTreasuryPoSRates(self ): 
         data={"jsonrpc": "2.0",
-            "method":"requestTreasuryInterestRates",
+            "method":"requestTreasuryPoSRates",
             "params": {
                 },
             "filter": self.GENERICFILTER
         }
-        logging.info( u'requestTreasuryInterestRates method call' )
+        logging.info( u'requestTreasuryPoSRates method call' )
         return self.send_request(data)
     #====================  
-    def getTreasuryInterestRates(self ): 
+    def getTreasuryPoSRates(self ): 
         data={"jsonrpc": "2.0",
-            "method":"getTreasuryInterestRates",
+            "method":"getTreasuryPoSRates",
             "params": {
                 },
             "filter": self.GENERICFILTER
         }
-        logging.info( u'getTreasuryInterestRates method call' )
+        logging.info( u'getTreasuryPoSRates method call' )
         return self.send_request(data)
     #====================  
     def requestTreasuryTransactionVolumes(self ): 
@@ -1131,24 +1173,146 @@ class Utopia(object):
         logging.info( u'clearTrayNotifications method call' )
         return self.send_request(data)
     #====================  
-    def getLicenses(self):
-
+    def getContactGroups(self ): 
         data={"jsonrpc": "2.0",
-                "method": "getLicenses",
-                "params": {}
-             }
-
-        logging.info( u'getLicenses method call' )
+            "method":"getContactGroups",
+            "params": {
+                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'getContactGroups method call' )
         return self.send_request(data)
     #====================  
-    def getContactLicenses(self, pk):
-
+    def getContactsByGroup(self,groupName ): 
         data={"jsonrpc": "2.0",
-                "method": "getContactLicenses",
-                "params": {
-                    "pk": pk
-					}
-            }
-
-        logging.info( u'getContactLicenses method call' )
-        return self.send_request(data)        
+            "method":"getContactsByGroup",
+            "params": {
+                'groupName' : groupName                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'getContactsByGroup method call' )
+        return self.send_request(data)
+    #====================  
+    def renameContactGroup(self,oldGroupName,newGroupName ): 
+        data={"jsonrpc": "2.0",
+            "method":"renameContactGroup",
+            "params": {
+                'oldGroupName' : oldGroupName,
+                'newGroupName' : newGroupName                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'renameContactGroup method call' )
+        return self.send_request(data)
+    #====================  
+    def deleteContactGroup(self,groupName ): 
+        data={"jsonrpc": "2.0",
+            "method":"deleteContactGroup",
+            "params": {
+                'groupName' : groupName                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'deleteContactGroup method call' )
+        return self.send_request(data)
+    #====================  
+    def getTransfersFromManager(self ): 
+        data={"jsonrpc": "2.0",
+            "method":"getTransfersFromManager",
+            "params": {
+                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'getTransfersFromManager method call' )
+        return self.send_request(data)
+    #====================  
+    def getFilesFromManager(self ): 
+        data={"jsonrpc": "2.0",
+            "method":"getFilesFromManager",
+            "params": {
+                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'getFilesFromManager method call' )
+        return self.send_request(data)
+    #====================  
+    def abortTransfers(self,transferId ): 
+        data={"jsonrpc": "2.0",
+            "method":"abortTransfers",
+            "params": {
+                'transferId' : transferId                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'abortTransfers method call' )
+        return self.send_request(data)
+    #====================  
+    def hideTransfers(self,transferId ): 
+        data={"jsonrpc": "2.0",
+            "method":"hideTransfers",
+            "params": {
+                'transferId' : transferId                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'hideTransfers method call' )
+        return self.send_request(data)
+    #====================  
+    def getFile(self,fileId ): 
+        data={"jsonrpc": "2.0",
+            "method":"getFile",
+            "params": {
+                'fileId' : fileId                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'getFile method call' )
+        return self.send_request(data)
+    #====================  
+    def deleteFile(self,fileId ): 
+        data={"jsonrpc": "2.0",
+            "method":"deleteFile",
+            "params": {
+                'fileId' : fileId                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'deleteFile method call' )
+        return self.send_request(data)
+    #====================  
+    def sendFileByMessage(self,tohex,fileId ): 
+        data={"jsonrpc": "2.0",
+            "method":"sendFileByMessage",
+            "params": {
+                'to' : tohex,
+                'fileId' : fileId                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'sendFileByMessage method call' )
+        return self.send_request(data)
+    #====================  
+    def getChannelBannedContacts(self,channelid ): 
+        data={"jsonrpc": "2.0",
+            "method":"getChannelBannedContacts",
+            "params": {
+                'channelid' : channelid                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'getChannelBannedContacts method call' )
+        return self.send_request(data)
+    #====================  
+    def applyChannelBannedContacts(self,channelid,newList ): 
+        data={"jsonrpc": "2.0",
+            "method":"applyChannelBannedContacts",
+            "params": {
+                'channelid' : channelid,
+                'newList' : newList                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'applyChannelBannedContacts method call' )
+        return self.send_request(data)
+    #====================  
+    def uploadFile(self,fileDataBase64,fileName ): 
+        data={"jsonrpc": "2.0",
+            "method":"uploadFile",
+            "params": {
+                'fileDataBase64' : fileDataBase64,
+                'fileName' : fileName                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'uploadFile method call' )
+        return self.send_request(data)
