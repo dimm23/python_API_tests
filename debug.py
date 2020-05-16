@@ -18,46 +18,43 @@ class MyTestResult(unittest.TestResult):
         print(str(test_name) + ": " + str(err[1]))
         super(MyTestResult, self).addError(test, err)
 
+
 class All_api_methods_testing(unittest.TestCase):
     u = api.Utopia("http://127.0.0.1:"+settings.API_PORT+"/api/1.0",settings.TOKEN)
     pattern = re.compile("^([A-Z0-9]){32}")   
-    getInvoicesParams = '{ "cardId": "", "invoiceId": "", "pk": "", "transactionId": "", "status": "", "startDateTime": "", "endDateTime": "", "referenceNumber": "" }'
+    getInvoicesParams = '{ "cardId": "", "invoiceId": "", "pk": "", "transactionId": "", "status": "", ' \
+                        '"startDateTime": "", "endDateTime": "", "referenceNumber": "" }'
     
     def setUp(self):        
-        self.status = False        
-       
-    def test_deleteCard(self):
-        # Setup
-        result = ""
-        card = list()
-        
+        self.status = False
+
+    def test_requestUnsTransfer(self, pk: str = settings.CONTACT_PK) -> json:
+        """Method requestUnsTransfer allows to transfer the uNS record to contact. The method is called with mandatory
+        'Name' and 'Public Key' parameters. Name parameter is the name of the uNS record from the list of own uNS
+        records. hexNewOwnerPk represents hash of the public portion of the key (as in some instances, key is now
+        known, only hash is), to which the transfer is being made. In the Response field the status of completion of
+        the operation is displayed."""
+
         # Action
-        s, cards = self.u.getCards()        
-        if len(cards) < 30 and not 'error' in cards:
-            card = list(filter(lambda x: x['name'] == 'API card' or '', cards))
-            if len(card) == 0:                
-                self.u.addCard("#FBEDC0","API card", "")
-                time.sleep(3)
-                s, cards = self.u.getCards()
-                card = list(filter(lambda x: x['name'] == 'API card', cards))
-                print("DEBUG: card: " + str(card[0]))
-        elif 'error' in cards:
-            raise Exception("Error in getCards: " + str(cards))
+        _, unss = self.u.unsRegisteredNames()
+        print(unss)
+        if len(unss) > 0 and 'error' not in unss:
+            try:
+                self.status, self.result = self.u.requestUnsTransfer(str(unss[0]['nick']), pk)
+            except Exception as e:
+                print(e)
         else:
-            card = list(filter(lambda x: x['name'] == 'API card' or '', cards))
-        try:
-            self.status, result = self.u.deleteCard(card[0]['cardid'])
-            print("delete result: " + str(result))
-        except Exception as e:
-            print("Exception: " + str(e))                
-        finally:
-            # Assertion
-            self.assertTrue(self.status)
-            self.assertTrue(self.pattern.match(str(result)), "Result '" + str(result) + "' is not reference number")
-               
+            self.u.unsCreateRecordRequest(settings.random_uns)
+            _, unss = self.u.unsRegisteredNames()
+            self.status, self.result = self.u.requestUnsTransfer(unss[0]['nick'], pk)
+
+        # Assertion
+        self.assertTrue(self.status, "Status or request: " + str(self.status) + ". uNS is " + str(unss[0]['nick']))
+        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+
     def tearDown(self):
-        #print("status: " + str(self.status))
-        #print("result: " + str(self.result))
+        print("status: " + str(self.status))
+        print("result: " + str(self.result))
         try:
             if "error" in str(self.result):
                 print("If result: " + str(self.result))
