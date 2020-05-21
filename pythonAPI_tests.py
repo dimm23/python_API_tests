@@ -6,17 +6,24 @@ import api
 from settings import *
 from datetime import datetime
 
+report_file = "test_report.txt"
+report_recipients = "31033EA6DD56AF6BD07B6DB4721A00BE9756084F2E76C17281FDDC57D73C0B09"
+
 
 class MyTestResult(unittest.TestResult):
     def addFailure(self, test, err):
         # print(str(test) + ": " + str(err))
         test_name = str(test).split(" ")[0]
-        print(str(test_name) + ": Failed")
+        with open(report_file, "a") as f:
+            print(str(test_name) + ": Failed")
+            f.write(str(test_name) + ": Failed" + "; " + str(err[1]) + "\n")
         super(MyTestResult, self).addFailure(test, err)
 
     def addError(self, test, err):
         test_name = str(test).split(" ")[0]
-        print(str(test_name) + ": " + str(err[1]))
+        with open(report_file, "a") as f:
+            f.write(str(test_name) + ": " + str(err[1]) + "\n")
+            print(str(test_name) + ": " + str(err[1]))
         super(MyTestResult, self).addError(test, err)
 
 
@@ -25,6 +32,11 @@ class AllApiMethodsTesting(unittest.TestCase):
     pattern = re.compile("^([A-Z0-9]){64}")  # pattern for check response as reference_number
     getInvoicesParams = '{ "cardId": "", "invoiceId": "", "pk": "", "transactionId": "", "status": "", ' \
                         '"startDateTime": "", "endDateTime": "", "referenceNumber": "" } '
+
+    @classmethod
+    def setUpClass(cls):
+        with open(report_file, "w"):
+            print("Python API autotests report")
 
     def test_getSystemInfo(self) -> json:
         """Method getSystemInfo returns information about current packaging
@@ -36,7 +48,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getBalance(self) -> str:
         """Method getBalance returns in the Response field the amount of cryptons on the primary balance,
@@ -47,7 +59,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getCards(self) -> json:
         """Method getCards returns in the Response field the current list of cards and their
@@ -58,7 +70,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getVouchers(self) -> json:
         """Method getVouchers returns to the Response field the information about existing vouchers as a list.
@@ -69,7 +81,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getInvoices(self) -> json:
         """Method getInvoices returns to the Response field the list of active invoices.
@@ -80,7 +92,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getProfileStatus(self) -> json:
         """Method getProfileStatus returns the profile status"""
@@ -90,7 +102,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getContacts(self, filtr: str = "") -> json:
         """Method getContacts returns to the Response field the list of contacts, it is possible to search by
@@ -104,7 +116,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getContactAvatar(self, contact_pk: str = CONTACT_PK) -> json:
         """Method getContactAvatar returns to the Response field the avatar of the selected user in the base64
@@ -115,7 +127,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_sendInstantMessage(self, contact_pk: str = CONTACT_PK) -> json:
         """Method sendInstantMessage sends personal message(IM) to the selected contact from the contact list.
@@ -131,7 +143,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_sendEmailMessage(self, contacts_pk: tuple = (CONTACT_PK,)) -> json:
         """Method sendEmailMessage sends uMail to the selected contact in the Utopia network.
@@ -148,7 +160,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_sendPaymentToPk(self, recipient: str = CONTACT_PK,
                              self_card: str = "",
@@ -236,7 +248,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # SetUp
         _, vouchers = self.u.getVouchers()
-        if len(vouchers) == 0 or 'error' in vouchers:
+        if len(vouchers) == 0 or 'Error' in vouchers:
             self.u.createVoucher(10)
             time.sleep(3)
             _, vouchers = self.u.getVouchers()
@@ -290,14 +302,14 @@ class AllApiMethodsTesting(unittest.TestCase):
         # Action
         _, invoices = self.u.getFinanceHistory(filters='ALL_REQUESTS', referenceNumber='', fromDate='', toDate='',
                                                batchId='', fromAmount='', toAmount='')
-        if len(invoices) > 0 and 'error' not in invoices:
+        if len(invoices) > 0 and 'Error' not in invoices:
             self.status, self.result = self.u.getInvoiceByReferenceNumber(invoices[0]['referenceNumber'])
         else:
-            raise Exception("There is no invoices or got error on request")
+            raise Exception("There is no invoices or got Error on request")
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getTransactionIdByReferenceNumber(self) -> json:
         """Method getTransactionIdByReferenceNumber allows to receive 'batchid' of the transaction by using
@@ -307,14 +319,14 @@ class AllApiMethodsTesting(unittest.TestCase):
         # Action
         _, transactions = self.u.getFinanceHistory(filters='ALL_REQUESTS', referenceNumber='', fromDate='', toDate='',
                                                    batchId='', fromAmount='', toAmount='')
-        if len(transactions) > 0 and 'error' not in transactions:
+        if len(transactions) > 0 and 'Error' not in transactions:
             self.status, self.result = self.u.getTransactionIdByReferenceNumber(transactions[0]['referenceNumber'])
         else:
-            raise Exception("There is no transactions or got error on request")
+            raise Exception("There is no transactions or got Error on request")
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_acceptInvoice(self) -> 'reference_number':
         """Method acceptInvoice performs payment of the incoming invoice. The method is called with mandatory
@@ -327,10 +339,10 @@ class AllApiMethodsTesting(unittest.TestCase):
         _, invoices = self.u.getInvoices(self.getInvoicesParams)
         incoming_invoices = [invoice for invoice in invoices if invoice['direction'] == 'Incoming']
         # incoming_invoices = list(filter(lambda x: x['direction'] == "Incoming", invoices))
-        if len(incoming_invoices) > 0 and 'error' not in incoming_invoices:
+        if len(incoming_invoices) > 0 and 'Error' not in incoming_invoices:
             self.status, result = self.u.acceptInvoice(incoming_invoices[0]['invoiceid'])
         else:
-            raise Exception("There is no incoming invoices or got error on request")
+            raise Exception("There is no incoming invoices or got Error on request")
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
@@ -365,11 +377,11 @@ class AllApiMethodsTesting(unittest.TestCase):
         _, invoices = self.u.getInvoices(self.getInvoicesParams)
         incoming_invoices = [invoice for invoice in invoices if invoice['direction'] == 'Incoming']
         # incoming_invoices = list(filter(lambda x: x['direction'] == "Incoming", invoices))
-        if len(incoming_invoices) > 0 and 'error' not in incoming_invoices:
+        if len(incoming_invoices) > 0 and 'Error' not in incoming_invoices:
             # result should contains reference number for decline invoice transaction
             status, result = self.u.declineInvoice(incoming_invoices[0]['invoiceid'])
         else:
-            raise Exception("There is no incoming invoices or got error on request")
+            raise Exception("There is no incoming invoices or got Error on request")
 
         # Assertion
         self.assertTrue(status, str(status))
@@ -386,7 +398,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(status)
-        self.assertTrue(result != "" and 'error' not in str(result), str(result))
+        self.assertTrue(result != "" and 'Error' not in str(result), str(result))
 
     def test_sendChannelMessage(self, channel_id: str = "81B8CA0B8E2A5C87C468927953BEB674",
                                 message: str = "Python api test") -> json:
@@ -402,7 +414,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_leaveChannel(self, channel_id: str = "C160AB99F292C98746C3EA6ABB6AC7CD", passwd: str = "utopia9") -> bool:
         """Method leaveChannel executes the exit from the selected channel. As a parameter the method takes the
@@ -496,7 +508,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_unsCreateRecordRequest(self, nick: str = random_uns, validTo: str = "2100-07-20",
                                     is_primary: str = "false", channel_id: str = '') -> 'reference_number':
@@ -521,14 +533,14 @@ class AllApiMethodsTesting(unittest.TestCase):
         the status of completion of the operation is displayed."""
 
         _, unss = self.u.unsRegisteredNames()
-        if len(unss) > 0 and 'error' not in unss:
+        if len(unss) > 0 and 'Error' not in unss:
             self.status, result = self.u.unsDeleteRecordRequest(unss[-1]["nick"])
 
             # Assertion
             self.assertTrue(self.status, "Status or request: " + str(self.status))
             self.assertTrue(self.pattern.match(str(result)), "Result '" + str(result) + "' is not reference number")
         else:
-            raise Exception("There is no UNS, or got error on request")
+            raise Exception("There is no UNS, or got Error on request")
 
     def test_unsSearchByPk(self, pk: str = CONTACT_PK) -> json:
         """Method unsSearchByPk returns in the Response field the list of all uNS names with selected 'Filter'
@@ -540,7 +552,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_unsSearchByNick(self, nick: str = CONTACT_NAME) -> json:
         """Method unsSearchByNick returns the list of uNS names by partial or full matching with selected 'Filter'
@@ -552,7 +564,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_unsRegisteredNames(self) -> json:
         """Method unsRegisteredNames returns in the Response field the list of all registered uNS for current user.
@@ -563,7 +575,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_unsModifyRecordRequest(self) -> 'reference_number':
         """unsModifyRecordRequest method sends a request to modify the uNS name in the Utopia ecosystem for specific
@@ -576,14 +588,14 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Actions
         _, unss = self.u.unsRegisteredNames()
-        if len(unss) > 0 and 'error' not in unss:
+        if len(unss) > 0 and 'Error' not in unss:
             self.status, result = self.u.unsModifyRecordRequest(unss[-1]['nick'], "2100-07-20", False, "")
 
             # Assertion
             self.assertTrue(self.status, "Status or request: " + str(self.status))
             self.assertTrue(self.pattern.match(str(result)), "Result '" + str(result) + "' is not reference number")
         else:
-            raise Exception("There is no UNS, or got error on request")
+            raise Exception("There is no UNS, or got Error on request")
 
     def test_setContactGroup(self, pk: str = CONTACT_PK, group_name: str = "PyAPI") -> bool:
         """Method setContactGroup creates group or transfers selected contact into the group in the contact list.
@@ -625,7 +637,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getEmailById(self) -> json:
         """Method getEmailById returns the information based on the selected email in uMail. The method is called by
@@ -634,14 +646,14 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Action
         _, emails = self.u.getEmailFolder(1, "")
-        if len(emails) > 0 and 'error' not in emails:
+        if len(emails) > 0 and 'Error' not in emails:
             self.status, self.result = self.u.getEmailById(emails[0])
         else:
-            raise Exception("There is no emails, or got error on request")
+            raise Exception("There is no emails, or got Error on request")
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_deleteEmail(self) -> json:
         """Method deleteEmail deletes email in uMail. First deletion will move email to the Trash, subsequent will
@@ -651,14 +663,14 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Action
         self.status, emails = self.u.getEmailFolder(1, "")
-        if len(emails) > 0 and 'error' not in emails:
+        if len(emails) > 0 and 'Error' not in emails:
             self.status, self.result = self.u.deleteEmail(emails[-1])
         else:
-            raise Exception("There is no emails, or got error on request")
+            raise Exception("There is no emails, or got Error on request")
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_clearTrayNotifications(self) -> bool:
         """Method clearTrayNotifications allows to drop all existing notifications in the tray of the operating system.
@@ -682,7 +694,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_sendReplyEmailMessage(self) -> json:
         """Method sendReplyEmailMessage creates response email in uMail for the incoming email and sends it to the
@@ -695,14 +707,14 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Action
         _, emails = self.u.getEmailFolder(1, "")
-        if len(emails) > 0 and 'error' not in emails:
+        if len(emails) > 0 and 'Error' not in emails:
             self.status, self.result = self.u.sendReplyEmailMessage(emails[-1], body, subject)
         else:
-            raise Exception("There is no emails, or got error on request")
+            raise Exception("There is no emails, or got Error on request")
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_sendForwardEmailMessage(self, recipient: str = CONTACT_PK, body: str = "", subject: str = "") -> json:
         """Method sendForwardEmailMessage creates response email for an incoming email in uMail and sends it to the
@@ -718,14 +730,14 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Action
         self.status, emails = self.u.getEmailFolder(1, "")
-        if len(emails) > 0 and 'error' not in emails:
+        if len(emails) > 0 and 'Error' not in emails:
             self.status, self.result = self.u.sendForwardEmailMessage(emails[-1], recipient, body, subject)
         else:
-            raise Exception("There is no emails, or got error on request")
+            raise Exception("There is no emails, or got Error on request")
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getFinanceHistory(self, filters: str = "ALL_TRANSACTIONS",
                                referenceNumber: str = "",
@@ -748,7 +760,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_requestUnsTransfer(self, pk: str = CONTACT_PK) -> json:
         """Method requestUnsTransfer allows to transfer the uNS record to contact. The method is called with mandatory
@@ -760,7 +772,7 @@ class AllApiMethodsTesting(unittest.TestCase):
         # Action
         _, unss = self.u.unsRegisteredNames()
         time.sleep(1)
-        if len(unss) > 0 and 'error' not in unss:
+        if len(unss) > 0 and 'Error' not in unss:
             self.status, self.result = self.u.requestUnsTransfer(unss[-1]['nick'], pk)
         else:
             self.u.unsCreateRecordRequest(random_uns)
@@ -770,7 +782,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status) + ". uNS is " + str(unss[-1]))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_incomingUnsTransfer(self) -> json:
         """Method incomingUnsTransfer returns in the Response field the list of all incoming uNS transfer records with
@@ -781,7 +793,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_acceptUnsTransfer(self) -> 'reference_number':
         """Method acceptUnsTransfer allows to accept the incoming record of the uNS transfer. The method is called
@@ -792,7 +804,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Action
         _, incoming_unses = self.u.incomingUnsTransfer()
-        if len(incoming_unses) > 0 and 'error' not in incoming_unses:
+        if len(incoming_unses) > 0 and 'Error' not in incoming_unses:
             self.status, result = self.u.acceptUnsTransfer(incoming_unses[0]['id'])
         else:
             raise Exception("There is no incoming UNS transfers")
@@ -810,7 +822,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Action
         _, incoming_unses = self.u.incomingUnsTransfer()
-        if len(incoming_unses) > 0 and 'error' not in incoming_unses:
+        if len(incoming_unses) > 0 and 'Error' not in incoming_unses:
             self.status, result = self.u.declineUnsTransfer(incoming_unses[0]['id'])
         else:
             raise Exception("There is no incoming UNS transfers")
@@ -828,7 +840,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getNetworkConnections(self) -> json:
         """Method getNetworkConnections returns in Response block detailed information about all current network
@@ -839,7 +851,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getProxyMappings(self) -> json:
         """Method getProxyMappings returns in Response block the list of all configured proxy mappings. The method
@@ -850,7 +862,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_createProxyMapping(self,
                                 srcHost: str = "uns",
@@ -870,15 +882,15 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Action
         _, unss = self.u.unsRegisteredNames()
-        if len(unss) > 0 and 'error' not in unss:
+        if len(unss) > 0 and 'Error' not in unss:
             srcHost = unss[0]["nick"]
             self.status, self.result = self.u.createProxyMapping(srcHost, srcPort, dstHost, dstPort, enabled)
         else:
-            raise Exception("There is no UNS records, or got error on request")
+            raise Exception("There is no UNS records, or got Error on request")
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_enableProxyMapping(self) -> json:
         """Method enableProxyMapping allows to turn on the ability to use the connection with specified 'MappingId' as
@@ -888,14 +900,14 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Action
         _, proxy_mappings = self.u.getProxyMappings()
-        if len(proxy_mappings) > 0 and 'error' not in proxy_mappings:
+        if len(proxy_mappings) > 0 and 'Error' not in proxy_mappings:
             self.status, self.result = self.u.enableProxyMapping(proxy_mappings[0]['id'])
         else:
-            raise Exception("There is no mappings or got error on request")
+            raise Exception("There is no mappings or got Error on request")
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_disableProxyMapping(self) -> json:
         """Method disableProxyMapping allows to turn off the ability to use the connection with specified 'MappingId'
@@ -905,14 +917,14 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Action
         _, proxy_mappings = self.u.getProxyMappings()
-        if len(proxy_mappings) > 0 and 'error' not in proxy_mappings:
+        if len(proxy_mappings) > 0 and 'Error' not in proxy_mappings:
             self.status, self.result = self.u.disableProxyMapping(proxy_mappings[0]['id'])
         else:
-            raise Exception("There is no mappings or got error on request")
+            raise Exception("There is no mappings or got Error on request")
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_removeProxyMapping(self) -> json:
         """Method removeProxyMapping allows to remove the selected configured of proxy mappings. The method is called
@@ -921,14 +933,14 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Action
         _, proxy_mappings = self.u.getProxyMappings()
-        if len(proxy_mappings) > 0 and 'error' not in proxy_mappings:
+        if len(proxy_mappings) > 0 and 'Error' not in proxy_mappings:
             self.status, self.result = self.u.removeProxyMapping(proxy_mappings[0]['id'])
         else:
-            raise Exception("There is no mappings or got error on request")
+            raise Exception("There is no mappings or got Error on request")
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_addCard(self,
                      color: str = "#FBEDC0",
@@ -957,7 +969,7 @@ class AllApiMethodsTesting(unittest.TestCase):
         _, cards = self.u.getCards()
         result = ""
 
-        if len(cards) > 0 and 'error' not in cards:
+        if len(cards) > 0 and 'Error' not in cards:
             card = [card for card in cards if card['name'] == 'API card']
             if len(card) == 0:
                 self.u.addCard("#FBEDC0", "API card", "")
@@ -982,7 +994,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getMiningBlocks(self) -> json:
         """Method getMiningBlocks returns to the Response field the information about the mining blocks for which the
@@ -993,7 +1005,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_enableMining(self, enabled: str = "true") -> bool:
         """Method enableMining turns on the mining in the Utopia client (mining is available only for x64 client). As
@@ -1045,7 +1057,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_lowTrafficMode(self) -> json:
         """Method lowTrafficMode returns in Response block the status of low Traffic mode. The method is called
@@ -1056,7 +1068,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_setLowTrafficMode(self, enabled: str = "false") -> json:
         """Method setLowTrafficMode allows to turn on or off the low Traffic mode. The method is called by using the
@@ -1068,7 +1080,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getWhoIsInfo(self, pk: str = CONTACT_PK) -> json:
         """Method getWhoIsInfo returns in Response block the detailed information about selected user. As a parameter
@@ -1080,7 +1092,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getChannelInfo(self, channel_id: str = CHANNEL_ID) -> json:
         """Method getChannelInfo returns in the Response field the information about the channel ( the response
@@ -1093,7 +1105,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getChannelModerators(self, channel_id: str = CHANNEL_ID) -> json:
         """Method getChannelModerators returns in the Response field the list of Public Keys of moderators. As a
@@ -1104,7 +1116,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getChannelModeratorRight(self, channel_id: str = CHANNEL_ID) -> json:
         """Method getChannelModeratorRight returns in the Response field the list of moderator rights in the channel
@@ -1115,14 +1127,14 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Action
         _, moderators = self.u.getChannelModerators(channel_id)
-        if len(moderators) > 0 and "error" not in moderators:
+        if len(moderators) > 0 and "Error" not in moderators:
             self.status, self.result = self.u.getChannelModeratorRight(channel_id, moderators[0])
         else:
-            raise Exception("There is no moderators or error on request")
+            raise Exception("There is no moderators or Error on request")
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_setProfileStatus(self, status: str = "Available", mood: str = "QA Engineer") -> json:
         """Method setProfileStatus sets the new status, as well as the mood message in the Utopia Ecosystem. The method
@@ -1135,7 +1147,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getEmails(self, folder_type: int = 1, fltr: str = "") -> json:
         """Method getEmails returns to the Response block the list of detailed of uMail emails in the selected folder
@@ -1150,7 +1162,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getChannelMessages(self, channel_id: str = CHANNEL_ID) -> json:
         """Method getChannelMessages returns in the Response block the history of communication from selected channel.
@@ -1161,7 +1173,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     # @unittest.skip("просьба не трогать ушан")
     def test_createChannel(self):
@@ -1185,7 +1197,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status: " + str(self.status))
-        self.assertTrue(myChannel != "" and "error" not in str(myChannel), str(myChannel))
+        self.assertTrue(myChannel != "" and "Error" not in str(myChannel), str(myChannel))
 
     def test_getOwnContact(self) -> json:
         """Method getOwnContact returns information about yourself."""
@@ -1195,7 +1207,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getChannelAvatar(self, channel_id: str = CHANNEL_ID, coder: str = "BASE64", format: str = "JPG") -> json:
         """Method getChannelAvatar returns to the Response field the avatar of the selected channel
@@ -1206,7 +1218,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_sendInstantQuote(self, pk: str = CONTACT_PK) -> json:
         """Method sendInstantQuote sends quote personal message(IM) to the selected contact from the contact list
@@ -1222,7 +1234,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getStickerCollections(self) -> json:
         """Method getStickerCollections returns collection names of stickers."""
@@ -1232,7 +1244,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getStickerNamesByCollection(self) -> json:
         """Method getStickerNamesByCollection returns available names from corresponded collection."""
@@ -1243,7 +1255,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getImageSticker(self) -> json:
         """Method getImageSticker returns image by sticker name from corresponded collection in coder that can be
@@ -1256,7 +1268,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_sendInstantSticker(self, contact_pk: str = CONTACT_PK) -> json:
         """Method sendInstantSticker sends sticker personal message(IM) to the selected contact from the contact list
@@ -1269,7 +1281,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_sendInstantBuzz(self, contact_pk: str = CONTACT_PK) -> json:
         """Method sendInstantBuzz sends buzz personal message(IM) to the selected contact from the contact list with
@@ -1280,7 +1292,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_sendInstantInvitation(self, pk: str = CONTACT_PK, channel_id: str = CHANNEL_ID) -> json:
         """Method sendInstantInvitation sends invitation personal message(IM) to the selected contact from the contact
@@ -1292,7 +1304,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_removeInstantMessages(self, contact_pk: str = CONTACT_PK) -> json:
         """Method removeInstantMessages removes all personal messages(IM) of the selected contact from the contact
@@ -1303,7 +1315,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getMiningInfo(self) -> json:
         """Method getMiningInfo returns statistics value of mining process."""
@@ -1313,7 +1325,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_sendChannelPicture(self, channel_id: str = "81B8CA0B8E2A5C87C468927953BEB674",
                                 pic: str = PICTURE) -> json:
@@ -1324,7 +1336,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     # @unittest.skip("просьба не трогать ушан")
     def test_modifyChannel(self) -> 'reference_number':
@@ -1394,7 +1406,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(result != "" and "error" not in str(result), str(result))
+        self.assertTrue(result != "" and "Error" not in str(result), str(result))
 
     def test_getChannelSystemInfo(self) -> json:
         """Method getChannelSystemInfo returns system properties of channels."""
@@ -1404,7 +1416,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_summaryUnsRegisteredNames(self) -> json:
         """Method summaryUnsRegisteredNames returns the list count of uNS names by each day"""
@@ -1414,7 +1426,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_requestTreasuryPoSRates(self) -> json:
         """Method requestTreasuryPoSRates makes request to obtain treasury PoS rate data"""
@@ -1424,7 +1436,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getTreasuryPoSRates(self) -> json:
         """Method getTreasuryPoSRates returns in Response block the detailed information about treasury PoS rate"""
@@ -1434,7 +1446,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_requestTreasuryTransactionVolumes(self) -> json:
         """Method requestTreasuryTransactionVolumes makes request to obtain treasury transaction volume data"""
@@ -1444,7 +1456,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getTreasuryTransactionVolumes(self) -> json:
         """Method getTreasuryTransactionVolumes returns in Response block the detailed information about treasury
@@ -1455,7 +1467,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_ucodeEncode(self, contact_pk: str = CONTACT_PK) -> json:
         """Method ucodeEncode returns image of ucode in size_image with public key from hex_code"""
@@ -1465,7 +1477,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_ucodeDecode(self, image: str = UCODE) -> json:
         """Method ucodeDecode returns hex public key from image in base64 format."""
@@ -1475,7 +1487,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getWebSocketState(self) -> json:
         """Method getWebSocketState returns WSS Notifications state, 0 - disabled or active listening port number."""
@@ -1485,7 +1497,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_setWebSocketState(self) -> json:
         """Method setWebSocketState set WSS Notification state."""
@@ -1495,7 +1507,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getContactGroups(self) -> json:
         """Method setContactGroup creates group or transfers selected contact into the group in the contact list.
@@ -1508,7 +1520,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getContactsByGroup(self) -> json:
         """Method getContactsByGroup returns to the Response field the list of contacts from group with corresponded
@@ -1520,7 +1532,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_deleteContactGroup(self) -> json:
         """Method deleteContactGroup delete corresponded group name, all contacts are moved under default group."""
@@ -1539,7 +1551,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getTransfersFromManager(self) -> json:
         """Method getTransfersFromManager returns list of file transfer."""
@@ -1549,7 +1561,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getFilesFromManager(self):
         # Action
@@ -1557,7 +1569,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_abortTransfers(self) -> json:
         """Method abortTransfers abort transfer with selected ID."""
@@ -1575,7 +1587,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_hideTransfers(self) -> json:
         """Method hideTransfers hide transfer with selected ID."""
@@ -1593,7 +1605,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getFile(self) -> json:
         """Method getFile return file with selected ID."""
@@ -1604,7 +1616,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_deleteFile(self):
         # Action
@@ -1613,7 +1625,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_sendFileByMessage(self, pk: str = CONTACT_PK) -> json:
         """Method sendFileByMessage send file with selected address."""
@@ -1624,7 +1636,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_getChannelBannedContacts(self, channel_id: str = CHANNEL_ID) -> json:
         """Method getChannelBannedContacts returns list banned contacts on corresponded channel with id channelid."""
@@ -1634,7 +1646,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_applyChannelBannedContacts(self, channel_id: str = CHANNEL_ID, pk: str = CONTACT_PK) -> json:
         """
@@ -1647,7 +1659,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, "Status or request: " + str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
     def test_uploadFile(self, pic: str = PICTURE) -> str:
         """Method uploadFile upload data in base64 format and returns id of new file."""
@@ -1657,11 +1669,15 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Assertion
         self.assertTrue(self.status, str(self.status))
-        self.assertTrue(self.result != "" and "error" not in str(self.result), str(self.result))
+        self.assertTrue(self.result != "" and "Error" not in str(self.result), str(self.result))
 
-    # def tearDown(self):
-    # if DEBUG:
-    #   print("Result: " + str(self.result))
+    @classmethod
+    def tearDownClass(cls):
+        report = ""
+        with open(report_file, "r") as f:
+            for row in f:
+                report = report + "\n" + str(row)
+        cls.u.sendEmailMessage(report_recipients, "Test Failures Report", report)
 
 
 if __name__ == "__main__":
