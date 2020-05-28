@@ -1,91 +1,91 @@
 ﻿#!/usr/bin/env python
 import requests
 import json
-import threading
-from array import array
 import logging
-import binascii
 import time
-#==============================    
-        
-class Utopia(object):
+# import threading
+# from array import array
+# import binascii
+# ==============================
 
+
+class Utopia(object):
     def __init__(self, APIURL, token, delay=0.5):
         self.APIURL = APIURL
         self.token = token
         self.delay = delay
-        
-        self.GENERICFILTER={"sortBy": "" , "offset": "", "limit": ""}             
+        self.EXTRAINFO = ''
+        self.GENERICFILTER = {"sortBy": "", "offset": "", "limit": ""}
 
-    #==============================
+    # ==============================
     def send_request(self, data):
-        
+        time.sleep(self.delay)
+        headers = {}
+        data["token"] = self.token
+
         try:
-            time.sleep(self.delay)
-            self.EXTRAINFO=''
-            headers = {}
-            data["token"]= self.token
-            
-            req = requests.post(self.APIURL, json.dumps(data).encode("utf-8"),headers=headers)
-            
-            logging.debug( req.status_code)
-            logging.debug( req.reason)
-            if (req.status_code != 200):
-                logging.error( u'Too Many Requests' )
-                return False , "Too Many Requests"
-                
-            j = json.loads(req.text)
-            
-            if ( "result" not in j):
-                logging.debug( u'Wrong response data')
-                return False, j["error"]
-            else:
-                self.EXTRAINFO = j["resultExtraInfo"]
-                return True , j["result"]
-            
+            req = requests.post(self.APIURL, json.dumps(data).encode("utf-8"), headers=headers)
         except Exception as e:
-            logging.error( u'This is an exception. Message:' )
-            logging.error( e )
-            return False , ""
-        
-    
-    #==============================
+            logging.error(u'This is an exception. Message:')
+            logging.error(e)
+            return False, ""
+
+        logging.debug(req.status_code)
+        logging.debug(req.reason)
+
+        if req.status_code != 200:
+            logging.error(u'Too Many Requests')
+            return False, "Too Many Requests"
+                
+        j = json.loads(req.text)
+            
+        if "result" not in j:
+            logging.debug(u'Wrong response data')
+            return False, j["error"]
+        else:
+            self.EXTRAINFO = j["resultExtraInfo"]
+            return True, j["result"]
+
+    # ==============================
+
     def genericFilter(self, sortBy, offset, limit):
         self.GENERICFILTER = {"sortBy": sortBy,
-							"offset": offset,
-							"limit": limit}
+                              "offset": offset,
+                              "limit": limit}
      
-    #====================
+    # ====================
    
     def genericFilterClear(self):
-        self.GENERICFILTER = {"sortBy": "","offset": "", "limit": ""}
+        self.GENERICFILTER = {"sortBy": "", "offset": "", "limit": ""}
 
-    #====================
-	
+    # ====================
     def getExtraInfo(self):
         return self.EXTRAINFO
-           #====================  
-    def getSystemInfo(self ): 
-        data={"jsonrpc": "2.0",
-            "method":"getSystemInfo",
+    # ====================
+
+    def getSystemInfo(self):
+        data = {"jsonrpc": "2.0",
+            "method": "getSystemInfo",
             "params": {
                 },
             "filter": self.GENERICFILTER
         }
-        logging.info( u'getSystemInfo method call' )
+        logging.info(u'getSystemInfo method call')
         return self.send_request(data)
-    #====================  
-    def getProfileStatus(self ): 
-        data={"jsonrpc": "2.0",
-            "method":"getProfileStatus",
+    # ====================
+
+    def getProfileStatus(self):
+        data = {"jsonrpc": "2.0",
+            "method": "getProfileStatus",
             "params": {
                 },
             "filter": self.GENERICFILTER
         }
-        logging.info( u'getProfileStatus method call' )
+        logging.info(u'getProfileStatus method call')
         return self.send_request(data)
-    #====================  
-    def setProfileStatus(self,status,mood ): 
+    # ====================
+
+    def setProfileStatus(self, status, mood):
         data={"jsonrpc": "2.0",
             "method":"setProfileStatus",
             "params": {

@@ -13,10 +13,8 @@ report_recipients = "31033EA6DD56AF6BD07B6DB4721A00BE9756084F2E76C17281FDDC57D73
 
 class MyTestResult(unittest.TestResult):
     def addFailure(self, test, err):
-        # print(str(test) + ": " + str(err))
         test_name = str(test).split(" ")[0]
         with open(report_file, "a") as f:
-            # print(str(test_name) + ": Failed")
             f.write(str(test_name) + ": Failed" + "; " + str(err[1]) + "\n")
         super(MyTestResult, self).addFailure(test, err)
 
@@ -24,13 +22,11 @@ class MyTestResult(unittest.TestResult):
         test_name = str(test).split(" ")[0]
         with open(report_file, "a") as f:
             f.write(str(test_name) + ": " + str(err[1]) + "\n")
-            # print(str(test_name) + ": " + str(err[1]))
         super(MyTestResult, self).addError(test, err)
 
 
 class AllApiMethodsTesting(unittest.TestCase):
     u = api.Utopia("http://127.0.0.1:" + API_PORT + "/api/1.0", TOKEN)
-    # pattern = re.compile("^([A-Z0-9]){64}")  # pattern for check response as reference_number
     getInvoicesParams = '{ "cardId": "", "invoiceId": "", "pk": "", "transactionId": "", "status": "", ' \
                         '"startDateTime": "", "endDateTime": "", "referenceNumber": "" } '
 
@@ -339,11 +335,17 @@ class AllApiMethodsTesting(unittest.TestCase):
         list of invoices with their detailed information. In response the declineInvoice method returns in the
         Response block the results of completing this request."""
 
+        invoice = None
+
         # Action
-        _, invoice_ref_num = self.u.sendInvoice("API request", CONTACT_CARD, 10)
-        time.sleep(3)  # wait for network confirmation
-        _, invoice = self.u.getInvoiceByReferenceNumber(invoice_ref_num)
-        status, result = self.u.cancelInvoice(invoice['invoiceid'])
+        _, awaiting_requests = self.u.getFinanceHistory("AWAITING_REQUESTS", "", "", "", "", "", "")
+        if len(awaiting_requests) < 5:
+            _, invoice_ref_num = self.u.sendInvoice("API request", CONTACT_CARD, 10)
+            time.sleep(3)  # wait for network confirmation
+            _, invoice = self.u.getInvoiceByReferenceNumber(invoice_ref_num)
+        else:
+            invoice = awaiting_requests[0]
+        status, result = self.u.cancelInvoice(invoice["invoiceid"])
         time.sleep(3)  # wait for network confirmation
 
         # Assertion
@@ -1289,9 +1291,7 @@ class AllApiMethodsTesting(unittest.TestCase):
                                                 languages, hash_tags, geo_tag, avatar, hide_in_ui)
             time.sleep(3)  # wait for uchan data base sync process ends
         else:
-            for channel in my_channels:
-                if channel["name"] != "testing_dev" and channel["name"] != "hidden channel":
-                    myChannel = channel["channelid"]
+            myChannel = [channel["channelid"] for channel in my_channels if channel["name"] != "testing_dev"][0]
         if myChannel != "":
             status, result = self.u.modifyChannel(myChannel, "edited on:" + str(datetime.today()), password,
                                                   languages, hash_tags, geo_tag, avatar, hide_in_ui)
