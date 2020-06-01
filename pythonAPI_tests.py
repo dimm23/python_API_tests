@@ -1583,35 +1583,36 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Action
         _, all_incoming_umails = self.u.getEmails(1, "")
-        umails_with_attach = [umail for umail in all_incoming_umails if 'attachments' in umail.keys()]
 
-        if len(umails_with_attach) > 0:
-            ids = [[umail['id'], attach['id']] for umail in umails_with_attach
-                   for attach in umail['attachments'] if attach['status'] == 'waiting']
-
-            status, result = self.u.acceptAttachment(ids[0][0], ids[0][1])
+        ids = [{"mail_id": umail['id'], "attach_id": attach['id']}
+               for umail in all_incoming_umails if 'attachments' in umail.keys()
+               for attach in umail['attachments'] if 'waiting' in attach.values()]
+        print(ids)
+        try:
+            status, result = self.u.acceptAttachment(ids[0]["mail_id"], ids[0]["attach_id"])
             AssertResultIsTrue(self, status, result)
-        else:
+        except:
             raise Exception("There is no incoming emails with attachments")
 
     def test_abortAttachment(self) -> bool:
         """Тест проверяет возможность отменить загружку вложенных во входящее письмо файлов.
-        Сначала получаем список всех входящих писем, потом отбираем из них те, у которых есть attachments.
-        Если их больше нуля, то отбираем со статусом waiting. Берём id этого письма и id аттача и вызываем метод
-        abortAttachment чтобы отменить загрузку вложения. Далее проверяем что пришло в ответ в result."""
+        Сначала получаем список всех входящих писем, потом генератором отбираем из них те, у которых есть attachments
+        со статусом waiting. Сохраняем id письма и id его аттача в статусе waiting в список словарей.
+        Берём id этого письма и id аттача и вызываем метод abortAttachment чтобы отменить загрузку вложения.
+        Далее проверяем что result не пустой, в нём нет сообщения об ошибке Error и он имеет значение True"""
 
         # Action
         _, all_incoming_umails = self.u.getEmails(1, "")
-        umails_with_attach = [umail for umail in all_incoming_umails if 'attachments' in umail.keys()]
 
-        if len(umails_with_attach) > 0:
-            ids = [[umail['id'], attach['id']] for umail in umails_with_attach
-                   for attach in umail['attachments'] if attach['status'] == 'waiting']
+        ids = [{"mail_id": umail['id'], "attach_id": attach['id']}
+               for umail in all_incoming_umails if 'attachments' in umail.keys()
+               for attach in umail['attachments'] if 'waiting' in attach.values()]
 
-            status, result = self.u.abortAttachment(ids[0][0], ids[0][1])
+        try:
+            status, result = self.u.abortAttachment(ids[0]["mail_id"], ids[0]["attach_id"])
             AssertResultIsTrue(self, status, result)
-        else:
-            raise Exception("There is no incoming emails with attachments")
+        except:
+            raise Exception("There is no incoming emails with attachments in status waiting")
 
     @classmethod
     def tearDownClass(cls):

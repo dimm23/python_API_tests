@@ -1,91 +1,93 @@
 ﻿#!/usr/bin/env python
 import requests
 import json
+import threading
+from array import array
 import logging
+import binascii
 import time
-# import threading
-# from array import array
-# import binascii
-# ==============================
-
-
+#==============================    
+        
 class Utopia(object):
-    def __init__(self, APIURL, token, delay=0.5):
+
+    def __init__(self, APIURL, token, delay = 0.5):
         self.APIURL = APIURL
         self.token = token
         self.delay = delay
-        self.EXTRAINFO = ''
-        self.GENERICFILTER = {"sortBy": "", "offset": "", "limit": ""}
+        
+        self.GENERICFILTER={"sortBy": "" , "offset": "", "limit": ""}             
 
-    # ==============================
+    #==============================
     def send_request(self, data):
-        time.sleep(self.delay)
-        headers = {}
-        data["token"] = self.token
-
+        
         try:
-            req = requests.post(self.APIURL, json.dumps(data).encode("utf-8"), headers=headers)
-        except Exception as e:
-            logging.error(u'This is an exception. Message:')
-            logging.error(e)
-            return False, ""
-
-        logging.debug(req.status_code)
-        logging.debug(req.reason)
-
-        if req.status_code != 200:
-            logging.error(u'Too Many Requests')
-            return False, "Too Many Requests"
-                
-        j = json.loads(req.text)
+            time.sleep(self.delay)
+            self.EXTRAINFO=''
+            headers = {}
+            data["token"]= self.token
             
-        if "result" not in j:
-            logging.debug(u'Wrong response data')
-            return False, j["error"]
-        else:
-            self.EXTRAINFO = j["resultExtraInfo"]
-            return True, j["result"]
-
-    # ==============================
-
+            req = requests.post(self.APIURL, json.dumps(data).encode("utf-8"),headers=headers)
+            
+            logging.debug( req.status_code)
+            logging.debug( req.reason)
+            if (req.status_code != 200):
+                logging.error( u'Too Many Requests' )
+                return False , "Too Many Requests"
+                
+            j = json.loads(req.text)
+            
+            if ( "result" not in j):
+                logging.debug( u'Wrong response data')
+                return False, j["error"]
+            else:
+                self.EXTRAINFO = j["resultExtraInfo"]
+                return True , j["result"]
+            
+        except Exception as e:
+            logging.error( u'This is an exception. Message:' )
+            logging.error( e )
+            return False , ""
+        
+    
+    #==============================
     def genericFilter(self, sortBy, offset, limit):
-        self.GENERICFILTER = {"sortBy": sortBy,
-                              "offset": offset,
-                              "limit": limit}
+        self.GENERICFILTER = {
+                            "sortBy": sortBy,
+							"offset": offset,
+							"limit": limit
+                            }
      
-    # ====================
+    #====================
    
     def genericFilterClear(self):
-        self.GENERICFILTER = {"sortBy": "", "offset": "", "limit": ""}
+        self.GENERICFILTER = { "sortBy": "","offset": "", "limit": "" }
 
-    # ====================
+    #====================
+	
     def getExtraInfo(self):
         return self.EXTRAINFO
-    # ====================
-
-    def getSystemInfo(self):
-        data = {"jsonrpc": "2.0",
-            "method": "getSystemInfo",
+           #====================  
+    def getSystemInfo(self): 
+        data={"jsonrpc": "2.0",
+            "method":"getSystemInfo",
             "params": {
                 },
             "filter": self.GENERICFILTER
         }
-        logging.info(u'getSystemInfo method call')
+        logging.info( u'getSystemInfo method call' )
         return self.send_request(data)
-    # ====================
-
-    def getProfileStatus(self):
-        data = {"jsonrpc": "2.0",
-            "method": "getProfileStatus",
+    #====================  
+    def getProfileStatus(self): 
+        data={"jsonrpc": "2.0",
+            "method":"getProfileStatus",
             "params": {
                 },
             "filter": self.GENERICFILTER
         }
-        logging.info(u'getProfileStatus method call')
+        logging.info( u'getProfileStatus method call' )
         return self.send_request(data)
-    # ====================
-
-    def setProfileStatus(self, status, mood):
+    #====================  
+    def setProfileStatus(self, status, mood): 
         data={"jsonrpc": "2.0",
             "method":"setProfileStatus",
             "params": {
@@ -96,7 +98,7 @@ class Utopia(object):
         logging.info( u'setProfileStatus method call' )
         return self.send_request(data)
     #====================  
-    def getOwnContact(self ): 
+    def getOwnContact(self): 
         data={"jsonrpc": "2.0",
             "method":"getOwnContact",
             "params": {
@@ -106,7 +108,7 @@ class Utopia(object):
         logging.info( u'getOwnContact method call' )
         return self.send_request(data)
     #====================  
-    def getContacts(self,filter ): 
+    def getContacts(self, filter): 
         data={"jsonrpc": "2.0",
             "method":"getContacts",
             "params": {
@@ -116,7 +118,7 @@ class Utopia(object):
         logging.info( u'getContacts method call' )
         return self.send_request(data)
     #====================  
-    def getContactAvatar(self,pk,coder,format ): 
+    def getContactAvatar(self, pk, coder, format): 
         data={"jsonrpc": "2.0",
             "method":"getContactAvatar",
             "params": {
@@ -128,7 +130,7 @@ class Utopia(object):
         logging.info( u'getContactAvatar method call' )
         return self.send_request(data)
     #====================  
-    def getChannelAvatar(self,channelid,coder,format ): 
+    def getChannelAvatar(self, channelid, coder, format): 
         data={"jsonrpc": "2.0",
             "method":"getChannelAvatar",
             "params": {
@@ -140,7 +142,7 @@ class Utopia(object):
         logging.info( u'getChannelAvatar method call' )
         return self.send_request(data)
     #====================  
-    def setContactGroup(self,contactPublicKey,groupName ): 
+    def setContactGroup(self, contactPublicKey, groupName): 
         data={"jsonrpc": "2.0",
             "method":"setContactGroup",
             "params": {
@@ -151,7 +153,7 @@ class Utopia(object):
         logging.info( u'setContactGroup method call' )
         return self.send_request(data)
     #====================  
-    def setContactNick(self,contactPublicKey,newNick ): 
+    def setContactNick(self, contactPublicKey, newNick): 
         data={"jsonrpc": "2.0",
             "method":"setContactNick",
             "params": {
@@ -162,7 +164,7 @@ class Utopia(object):
         logging.info( u'setContactNick method call' )
         return self.send_request(data)
     #====================  
-    def sendInstantMessage(self,tohex,text ): 
+    def sendInstantMessage(self, tohex, text): 
         data={"jsonrpc": "2.0",
             "method":"sendInstantMessage",
             "params": {
@@ -173,7 +175,7 @@ class Utopia(object):
         logging.info( u'sendInstantMessage method call' )
         return self.send_request(data)
     #====================  
-    def sendInstantQuote(self,tohex,text,id_message ): 
+    def sendInstantQuote(self, tohex, text, id_message): 
         data={"jsonrpc": "2.0",
             "method":"sendInstantQuote",
             "params": {
@@ -185,7 +187,7 @@ class Utopia(object):
         logging.info( u'sendInstantQuote method call' )
         return self.send_request(data)
     #====================  
-    def getStickerCollections(self ): 
+    def getStickerCollections(self): 
         data={"jsonrpc": "2.0",
             "method":"getStickerCollections",
             "params": {
@@ -195,7 +197,7 @@ class Utopia(object):
         logging.info( u'getStickerCollections method call' )
         return self.send_request(data)
     #====================  
-    def getStickerNamesByCollection(self,collection_name ): 
+    def getStickerNamesByCollection(self, collection_name): 
         data={"jsonrpc": "2.0",
             "method":"getStickerNamesByCollection",
             "params": {
@@ -205,7 +207,7 @@ class Utopia(object):
         logging.info( u'getStickerNamesByCollection method call' )
         return self.send_request(data)
     #====================  
-    def getImageSticker(self,collection_name,sticker_name,coder ): 
+    def getImageSticker(self, collection_name, sticker_name, coder): 
         data={"jsonrpc": "2.0",
             "method":"getImageSticker",
             "params": {
@@ -217,7 +219,7 @@ class Utopia(object):
         logging.info( u'getImageSticker method call' )
         return self.send_request(data)
     #====================  
-    def sendInstantSticker(self,tohex,collection,name ): 
+    def sendInstantSticker(self, tohex, collection, name): 
         data={"jsonrpc": "2.0",
             "method":"sendInstantSticker",
             "params": {
@@ -229,7 +231,7 @@ class Utopia(object):
         logging.info( u'sendInstantSticker method call' )
         return self.send_request(data)
     #====================  
-    def sendInstantBuzz(self,tohex,comments ): 
+    def sendInstantBuzz(self, tohex, comments): 
         data={"jsonrpc": "2.0",
             "method":"sendInstantBuzz",
             "params": {
@@ -240,7 +242,7 @@ class Utopia(object):
         logging.info( u'sendInstantBuzz method call' )
         return self.send_request(data)
     #====================  
-    def sendInstantInvitation(self,tohex,channelid,description,comments ): 
+    def sendInstantInvitation(self, tohex, channelid, description, comments): 
         data={"jsonrpc": "2.0",
             "method":"sendInstantInvitation",
             "params": {
@@ -253,7 +255,7 @@ class Utopia(object):
         logging.info( u'sendInstantInvitation method call' )
         return self.send_request(data)
     #====================  
-    def removeInstantMessages(self,hex_contact_public_key ): 
+    def removeInstantMessages(self, hex_contact_public_key): 
         data={"jsonrpc": "2.0",
             "method":"removeInstantMessages",
             "params": {
@@ -263,7 +265,7 @@ class Utopia(object):
         logging.info( u'removeInstantMessages method call' )
         return self.send_request(data)
     #====================  
-    def getContactMessages(self,pk ): 
+    def getContactMessages(self, pk): 
         data={"jsonrpc": "2.0",
             "method":"getContactMessages",
             "params": {
@@ -273,19 +275,20 @@ class Utopia(object):
         logging.info( u'getContactMessages method call' )
         return self.send_request(data)
     #====================  
-    def sendEmailMessage(self,tohex,subject,body ): 
+    def sendEmailMessage(self, tohex, subject, body, attachmentFileId): 
         data={"jsonrpc": "2.0",
             "method":"sendEmailMessage",
             "params": {
                 'to' : tohex,
                 'subject' : subject,
-                'body' : body                },
+                'body' : body,
+                'attachmentFileId' : attachmentFileId                },
             "filter": self.GENERICFILTER
         }
         logging.info( u'sendEmailMessage method call' )
         return self.send_request(data)
     #====================  
-    def sendPayment(self,tohex,comment,cardid,amount ): 
+    def sendPayment(self, tohex, comment, cardid, amount): 
         data={"jsonrpc": "2.0",
             "method":"sendPayment",
             "params": {
@@ -298,7 +301,7 @@ class Utopia(object):
         logging.info( u'sendPayment method call' )
         return self.send_request(data)
     #====================  
-    def getEmailFolder(self,folderType,filter ): 
+    def getEmailFolder(self, folderType, filter): 
         data={"jsonrpc": "2.0",
             "method":"getEmailFolder",
             "params": {
@@ -309,7 +312,7 @@ class Utopia(object):
         logging.info( u'getEmailFolder method call' )
         return self.send_request(data)
     #====================  
-    def getEmails(self,folderType,filter ): 
+    def getEmails(self, folderType, filter): 
         data={"jsonrpc": "2.0",
             "method":"getEmails",
             "params": {
@@ -320,7 +323,29 @@ class Utopia(object):
         logging.info( u'getEmails method call' )
         return self.send_request(data)
     #====================  
-    def getEmailById(self,id ): 
+    def abortAttachment(self, emailId, fileId): 
+        data={"jsonrpc": "2.0",
+            "method":"abortAttachment",
+            "params": {
+                'emailId' : emailId,
+                'fileId' : fileId                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'abortAttachment method call' )
+        return self.send_request(data)
+    #====================  
+    def acceptAttachment(self, emailId, fileId): 
+        data={"jsonrpc": "2.0",
+            "method":"acceptAttachment",
+            "params": {
+                'emailId' : emailId,
+                'fileId' : fileId                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'acceptAttachment method call' )
+        return self.send_request(data)
+    #====================  
+    def getEmailById(self, id): 
         data={"jsonrpc": "2.0",
             "method":"getEmailById",
             "params": {
@@ -330,7 +355,7 @@ class Utopia(object):
         logging.info( u'getEmailById method call' )
         return self.send_request(data)
     #====================  
-    def deleteEmail(self,id ): 
+    def deleteEmail(self, id): 
         data={"jsonrpc": "2.0",
             "method":"deleteEmail",
             "params": {
@@ -340,32 +365,34 @@ class Utopia(object):
         logging.info( u'deleteEmail method call' )
         return self.send_request(data)
     #====================  
-    def sendReplyEmailMessage(self,id,body,subject ): 
+    def sendReplyEmailMessage(self, id, body, subject, attachmentFileId): 
         data={"jsonrpc": "2.0",
             "method":"sendReplyEmailMessage",
             "params": {
                 'id' : id,
                 'body' : body,
-                'subject' : subject                },
+                'subject' : subject,
+                'attachmentFileId' : attachmentFileId                },
             "filter": self.GENERICFILTER
         }
         logging.info( u'sendReplyEmailMessage method call' )
         return self.send_request(data)
     #====================  
-    def sendForwardEmailMessage(self,id,tohex,body,subject ): 
+    def sendForwardEmailMessage(self, id, tohex, body, subject, attachmentFileId): 
         data={"jsonrpc": "2.0",
             "method":"sendForwardEmailMessage",
             "params": {
                 'id' : id,
                 'to' : tohex,
                 'body' : body,
-                'subject' : subject                },
+                'subject' : subject,
+                'attachmentFileId' : attachmentFileId                },
             "filter": self.GENERICFILTER
         }
         logging.info( u'sendForwardEmailMessage method call' )
         return self.send_request(data)
     #====================  
-    def getFinanceSystemInformation(self ): 
+    def getFinanceSystemInformation(self): 
         data={"jsonrpc": "2.0",
             "method":"getFinanceSystemInformation",
             "params": {
@@ -375,7 +402,7 @@ class Utopia(object):
         logging.info( u'getFinanceSystemInformation method call' )
         return self.send_request(data)
     #====================  
-    def getBalance(self ): 
+    def getBalance(self): 
         data={"jsonrpc": "2.0",
             "method":"getBalance",
             "params": {
@@ -385,7 +412,7 @@ class Utopia(object):
         logging.info( u'getBalance method call' )
         return self.send_request(data)
     #====================  
-    def getFinanceHistory(self,filters,referenceNumber,fromDate,toDate,batchId,fromAmount,toAmount ): 
+    def getFinanceHistory(self, filters, referenceNumber, fromDate, toDate, batchId, fromAmount, toAmount): 
         data={"jsonrpc": "2.0",
             "method":"getFinanceHistory",
             "params": {
@@ -401,7 +428,7 @@ class Utopia(object):
         logging.info( u'getFinanceHistory method call' )
         return self.send_request(data)
     #====================  
-    def getCards(self ): 
+    def getCards(self): 
         data={"jsonrpc": "2.0",
             "method":"getCards",
             "params": {
@@ -411,7 +438,7 @@ class Utopia(object):
         logging.info( u'getCards method call' )
         return self.send_request(data)
     #====================  
-    def addCard(self,color,name,preorderNumberInCard ): 
+    def addCard(self, color, name, preorderNumberInCard): 
         data={"jsonrpc": "2.0",
             "method":"addCard",
             "params": {
@@ -423,7 +450,7 @@ class Utopia(object):
         logging.info( u'addCard method call' )
         return self.send_request(data)
     #====================  
-    def deleteCard(self,cardId ): 
+    def deleteCard(self, cardId): 
         data={"jsonrpc": "2.0",
             "method":"deleteCard",
             "params": {
@@ -433,7 +460,7 @@ class Utopia(object):
         logging.info( u'deleteCard method call' )
         return self.send_request(data)
     #====================  
-    def enableMining(self,enable ): 
+    def enableMining(self, enable): 
         data={"jsonrpc": "2.0",
             "method":"enableMining",
             "params": {
@@ -443,7 +470,7 @@ class Utopia(object):
         logging.info( u'enableMining method call' )
         return self.send_request(data)
     #====================  
-    def enablePoS(self,enable ): 
+    def enablePoS(self, enable): 
         data={"jsonrpc": "2.0",
             "method":"enablePoS",
             "params": {
@@ -453,7 +480,7 @@ class Utopia(object):
         logging.info( u'enablePoS method call' )
         return self.send_request(data)
     #====================  
-    def enableHistoryMining(self,enable ): 
+    def enableHistoryMining(self, enable): 
         data={"jsonrpc": "2.0",
             "method":"enableHistoryMining",
             "params": {
@@ -463,7 +490,7 @@ class Utopia(object):
         logging.info( u'enableHistoryMining method call' )
         return self.send_request(data)
     #====================  
-    def statusHistoryMining(self ): 
+    def statusHistoryMining(self): 
         data={"jsonrpc": "2.0",
             "method":"statusHistoryMining",
             "params": {
@@ -473,7 +500,7 @@ class Utopia(object):
         logging.info( u'statusHistoryMining method call' )
         return self.send_request(data)
     #====================  
-    def getMiningBlocks(self ): 
+    def getMiningBlocks(self): 
         data={"jsonrpc": "2.0",
             "method":"getMiningBlocks",
             "params": {
@@ -483,7 +510,7 @@ class Utopia(object):
         logging.info( u'getMiningBlocks method call' )
         return self.send_request(data)
     #====================  
-    def getMiningInfo(self ): 
+    def getMiningInfo(self): 
         data={"jsonrpc": "2.0",
             "method":"getMiningInfo",
             "params": {
@@ -493,7 +520,7 @@ class Utopia(object):
         logging.info( u'getMiningInfo method call' )
         return self.send_request(data)
     #====================  
-    def getVouchers(self ): 
+    def getVouchers(self): 
         data={"jsonrpc": "2.0",
             "method":"getVouchers",
             "params": {
@@ -503,7 +530,7 @@ class Utopia(object):
         logging.info( u'getVouchers method call' )
         return self.send_request(data)
     #====================  
-    def createVoucher(self,amount ): 
+    def createVoucher(self, amount): 
         data={"jsonrpc": "2.0",
             "method":"createVoucher",
             "params": {
@@ -513,7 +540,7 @@ class Utopia(object):
         logging.info( u'createVoucher method call' )
         return self.send_request(data)
     #====================  
-    def useVoucher(self,voucherid ): 
+    def useVoucher(self, voucherid): 
         data={"jsonrpc": "2.0",
             "method":"useVoucher",
             "params": {
@@ -523,7 +550,7 @@ class Utopia(object):
         logging.info( u'useVoucher method call' )
         return self.send_request(data)
     #====================  
-    def deleteVoucher(self,voucherid ): 
+    def deleteVoucher(self, voucherid): 
         data={"jsonrpc": "2.0",
             "method":"deleteVoucher",
             "params": {
@@ -533,7 +560,7 @@ class Utopia(object):
         logging.info( u'deleteVoucher method call' )
         return self.send_request(data)
     #====================  
-    def getInvoices(self,parameters ): 
+    def getInvoices(self, parameters): 
         data={"jsonrpc": "2.0",
             "method":"getInvoices",
             "params": {
@@ -543,7 +570,7 @@ class Utopia(object):
         logging.info( u'getInvoices method call' )
         return self.send_request(data)
     #====================  
-    def getInvoiceByReferenceNumber(self,referenceNumber ): 
+    def getInvoiceByReferenceNumber(self, referenceNumber): 
         data={"jsonrpc": "2.0",
             "method":"getInvoiceByReferenceNumber",
             "params": {
@@ -553,7 +580,7 @@ class Utopia(object):
         logging.info( u'getInvoiceByReferenceNumber method call' )
         return self.send_request(data)
     #====================  
-    def getTransactionIdByReferenceNumber(self,referenceNumber ): 
+    def getTransactionIdByReferenceNumber(self, referenceNumber): 
         data={"jsonrpc": "2.0",
             "method":"getTransactionIdByReferenceNumber",
             "params": {
@@ -563,7 +590,7 @@ class Utopia(object):
         logging.info( u'getTransactionIdByReferenceNumber method call' )
         return self.send_request(data)
     #====================  
-    def sendInvoice(self,comment,cardid,amount ): 
+    def sendInvoice(self, comment, cardid, amount): 
         data={"jsonrpc": "2.0",
             "method":"sendInvoice",
             "params": {
@@ -575,7 +602,7 @@ class Utopia(object):
         logging.info( u'sendInvoice method call' )
         return self.send_request(data)
     #====================  
-    def acceptInvoice(self,invoiceid ): 
+    def acceptInvoice(self, invoiceid): 
         data={"jsonrpc": "2.0",
             "method":"acceptInvoice",
             "params": {
@@ -585,7 +612,7 @@ class Utopia(object):
         logging.info( u'acceptInvoice method call' )
         return self.send_request(data)
     #====================  
-    def declineInvoice(self,invoiceid ): 
+    def declineInvoice(self, invoiceid): 
         data={"jsonrpc": "2.0",
             "method":"declineInvoice",
             "params": {
@@ -595,7 +622,7 @@ class Utopia(object):
         logging.info( u'declineInvoice method call' )
         return self.send_request(data)
     #====================  
-    def cancelInvoice(self,invoiceid ): 
+    def cancelInvoice(self, invoiceid): 
         data={"jsonrpc": "2.0",
             "method":"cancelInvoice",
             "params": {
@@ -605,7 +632,7 @@ class Utopia(object):
         logging.info( u'cancelInvoice method call' )
         return self.send_request(data)
     #====================  
-    def requestUnsTransfer(self,name,hexNewOwnerPk ): 
+    def requestUnsTransfer(self, name, hexNewOwnerPk): 
         data={"jsonrpc": "2.0",
             "method":"requestUnsTransfer",
             "params": {
@@ -616,7 +643,7 @@ class Utopia(object):
         logging.info( u'requestUnsTransfer method call' )
         return self.send_request(data)
     #====================  
-    def acceptUnsTransfer(self,requestId ): 
+    def acceptUnsTransfer(self, requestId): 
         data={"jsonrpc": "2.0",
             "method":"acceptUnsTransfer",
             "params": {
@@ -626,7 +653,7 @@ class Utopia(object):
         logging.info( u'acceptUnsTransfer method call' )
         return self.send_request(data)
     #====================  
-    def declineUnsTransfer(self,requestId ): 
+    def declineUnsTransfer(self, requestId): 
         data={"jsonrpc": "2.0",
             "method":"declineUnsTransfer",
             "params": {
@@ -636,7 +663,7 @@ class Utopia(object):
         logging.info( u'declineUnsTransfer method call' )
         return self.send_request(data)
     #====================  
-    def incomingUnsTransfer(self ): 
+    def incomingUnsTransfer(self): 
         data={"jsonrpc": "2.0",
             "method":"incomingUnsTransfer",
             "params": {
@@ -646,7 +673,7 @@ class Utopia(object):
         logging.info( u'incomingUnsTransfer method call' )
         return self.send_request(data)
     #====================  
-    def outgoingUnsTransfer(self ): 
+    def outgoingUnsTransfer(self): 
         data={"jsonrpc": "2.0",
             "method":"outgoingUnsTransfer",
             "params": {
@@ -656,7 +683,7 @@ class Utopia(object):
         logging.info( u'outgoingUnsTransfer method call' )
         return self.send_request(data)
     #====================  
-    def storageWipe(self ): 
+    def storageWipe(self): 
         data={"jsonrpc": "2.0",
             "method":"storageWipe",
             "params": {
@@ -666,7 +693,7 @@ class Utopia(object):
         logging.info( u'storageWipe method call' )
         return self.send_request(data)
     #====================  
-    def sendAuthorizationRequest(self,pk,message ): 
+    def sendAuthorizationRequest(self, pk, message): 
         data={"jsonrpc": "2.0",
             "method":"sendAuthorizationRequest",
             "params": {
@@ -677,7 +704,7 @@ class Utopia(object):
         logging.info( u'sendAuthorizationRequest method call' )
         return self.send_request(data)
     #====================  
-    def acceptAuthorizationRequest(self,pk,message ): 
+    def acceptAuthorizationRequest(self, pk, message): 
         data={"jsonrpc": "2.0",
             "method":"acceptAuthorizationRequest",
             "params": {
@@ -688,7 +715,7 @@ class Utopia(object):
         logging.info( u'acceptAuthorizationRequest method call' )
         return self.send_request(data)
     #====================  
-    def rejectAuthorizationRequest(self,pk,message ): 
+    def rejectAuthorizationRequest(self, pk, message): 
         data={"jsonrpc": "2.0",
             "method":"rejectAuthorizationRequest",
             "params": {
@@ -699,7 +726,7 @@ class Utopia(object):
         logging.info( u'rejectAuthorizationRequest method call' )
         return self.send_request(data)
     #====================  
-    def deleteContact(self,pk ): 
+    def deleteContact(self, pk): 
         data={"jsonrpc": "2.0",
             "method":"deleteContact",
             "params": {
@@ -709,7 +736,7 @@ class Utopia(object):
         logging.info( u'deleteContact method call' )
         return self.send_request(data)
     #====================  
-    def getChannels(self,filter,channel_type ): 
+    def getChannels(self, filter, channel_type): 
         data={"jsonrpc": "2.0",
             "method":"getChannels",
             "params": {
@@ -720,7 +747,7 @@ class Utopia(object):
         logging.info( u'getChannels method call' )
         return self.send_request(data)
     #====================  
-    def sendChannelMessage(self,channelid,message ): 
+    def sendChannelMessage(self, channelid, message): 
         data={"jsonrpc": "2.0",
             "method":"sendChannelMessage",
             "params": {
@@ -731,7 +758,7 @@ class Utopia(object):
         logging.info( u'sendChannelMessage method call' )
         return self.send_request(data)
     #====================  
-    def sendChannelPicture(self,channelid,base64_image,filename_image ): 
+    def sendChannelPicture(self, channelid, base64_image, filename_image): 
         data={"jsonrpc": "2.0",
             "method":"sendChannelPicture",
             "params": {
@@ -743,7 +770,7 @@ class Utopia(object):
         logging.info( u'sendChannelPicture method call' )
         return self.send_request(data)
     #====================  
-    def joinChannel(self,ident,password ): 
+    def joinChannel(self, ident, password): 
         data={"jsonrpc": "2.0",
             "method":"joinChannel",
             "params": {
@@ -754,7 +781,7 @@ class Utopia(object):
         logging.info( u'joinChannel method call' )
         return self.send_request(data)
     #====================  
-    def leaveChannel(self,channelid ): 
+    def leaveChannel(self, channelid): 
         data={"jsonrpc": "2.0",
             "method":"leaveChannel",
             "params": {
@@ -764,7 +791,7 @@ class Utopia(object):
         logging.info( u'leaveChannel method call' )
         return self.send_request(data)
     #====================  
-    def getChannelContacts(self,channelid ): 
+    def getChannelContacts(self, channelid): 
         data={"jsonrpc": "2.0",
             "method":"getChannelContacts",
             "params": {
@@ -774,7 +801,7 @@ class Utopia(object):
         logging.info( u'getChannelContacts method call' )
         return self.send_request(data)
     #====================  
-    def getChannelMessages(self,channelid ): 
+    def getChannelMessages(self, channelid): 
         data={"jsonrpc": "2.0",
             "method":"getChannelMessages",
             "params": {
@@ -784,7 +811,7 @@ class Utopia(object):
         logging.info( u'getChannelMessages method call' )
         return self.send_request(data)
     #====================  
-    def getChannelInfo(self,channelid ): 
+    def getChannelInfo(self, channelid): 
         data={"jsonrpc": "2.0",
             "method":"getChannelInfo",
             "params": {
@@ -794,7 +821,7 @@ class Utopia(object):
         logging.info( u'getChannelInfo method call' )
         return self.send_request(data)
     #====================  
-    def getChannelModerators(self,channelid ): 
+    def getChannelModerators(self, channelid): 
         data={"jsonrpc": "2.0",
             "method":"getChannelModerators",
             "params": {
@@ -804,7 +831,7 @@ class Utopia(object):
         logging.info( u'getChannelModerators method call' )
         return self.send_request(data)
     #====================  
-    def getChannelModeratorRight(self,channelid,moderator ): 
+    def getChannelModeratorRight(self, channelid, moderator): 
         data={"jsonrpc": "2.0",
             "method":"getChannelModeratorRight",
             "params": {
@@ -815,7 +842,7 @@ class Utopia(object):
         logging.info( u'getChannelModeratorRight method call' )
         return self.send_request(data)
     #====================  
-    def createChannel(self,channel_name,description,read_only,read_only_privacy,password,languages,hashtags,geoTag,base64_avatar_image,hide_in_UI ): 
+    def createChannel(self, channel_name, description, read_only, read_only_privacy, password, languages, hashtags, geoTag, base64_avatar_image, hide_in_UI): 
         data={"jsonrpc": "2.0",
             "method":"createChannel",
             "params": {
@@ -834,12 +861,14 @@ class Utopia(object):
         logging.info( u'createChannel method call' )
         return self.send_request(data)
     #====================  
-    def modifyChannel(self,channelid,description,password,languages,hashtags,geoTag,base64_avatar_image,hide_in_UI ): 
+    def modifyChannel(self, channelid, description, read_only, read_only_privacy, password, languages, hashtags, geoTag, base64_avatar_image, hide_in_UI): 
         data={"jsonrpc": "2.0",
             "method":"modifyChannel",
             "params": {
                 'channelid' : channelid,
                 'description' : description,
+                'read_only' : read_only,
+                'read_only_privacy' : read_only_privacy,
                 'password' : password,
                 'languages' : languages,
                 'hashtags' : hashtags,
@@ -851,33 +880,31 @@ class Utopia(object):
         logging.info( u'modifyChannel method call' )
         return self.send_request(data)
     #====================  
-    def modifyChannelTitle(self,channelid,newTitle,password ): 
+    def modifyChannelTitle(self, channelid, newTitle, password): 
         data={"jsonrpc": "2.0",
             "method":"modifyChannelTitle",
             "params": {
                 'channelid' : channelid,
                 'newTitle' : newTitle,
-                'password' : password
-            },
+                'password' : password                },
             "filter": self.GENERICFILTER
         }
         logging.info( u'modifyChannelTitle method call' )
         return self.send_request(data)
     #====================  
-    def modifyChannelPassword(self,channelid,newPassword,password ): 
+    def modifyChannelPassword(self, channelid, newPassword, password): 
         data={"jsonrpc": "2.0",
             "method":"modifyChannelPassword",
             "params": {
                 'channelid' : channelid,
                 'newPassword' : newPassword,
-                'password' : password
-            },
+                'password' : password                },
             "filter": self.GENERICFILTER
         }
         logging.info( u'modifyChannelPassword method call' )
         return self.send_request(data)
     #====================  
-    def deleteChannel(self,channelid,password ): 
+    def deleteChannel(self, channelid, password): 
         data={"jsonrpc": "2.0",
             "method":"deleteChannel",
             "params": {
@@ -888,7 +915,7 @@ class Utopia(object):
         logging.info( u'deleteChannel method call' )
         return self.send_request(data)
     #====================  
-    def getChannelSystemInfo(self ): 
+    def getChannelSystemInfo(self): 
         data={"jsonrpc": "2.0",
             "method":"getChannelSystemInfo",
             "params": {
@@ -898,7 +925,7 @@ class Utopia(object):
         logging.info( u'getChannelSystemInfo method call' )
         return self.send_request(data)
     #====================  
-    def unsCreateRecordRequest(self,nick,valid,isPrimary,channelId ): 
+    def unsCreateRecordRequest(self, nick, valid, isPrimary, channelId): 
         data={"jsonrpc": "2.0",
             "method":"unsCreateRecordRequest",
             "params": {
@@ -911,7 +938,7 @@ class Utopia(object):
         logging.info( u'unsCreateRecordRequest method call' )
         return self.send_request(data)
     #====================  
-    def unsModifyRecordRequest(self,nick,valid,isPrimary,channelId ): 
+    def unsModifyRecordRequest(self, nick, valid, isPrimary, channelId): 
         data={"jsonrpc": "2.0",
             "method":"unsModifyRecordRequest",
             "params": {
@@ -924,7 +951,7 @@ class Utopia(object):
         logging.info( u'unsModifyRecordRequest method call' )
         return self.send_request(data)
     #====================  
-    def unsDeleteRecordRequest(self,nick ): 
+    def unsDeleteRecordRequest(self, nick): 
         data={"jsonrpc": "2.0",
             "method":"unsDeleteRecordRequest",
             "params": {
@@ -934,7 +961,7 @@ class Utopia(object):
         logging.info( u'unsDeleteRecordRequest method call' )
         return self.send_request(data)
     #====================  
-    def unsSearchByPk(self,filter ): 
+    def unsSearchByPk(self, filter): 
         data={"jsonrpc": "2.0",
             "method":"unsSearchByPk",
             "params": {
@@ -944,7 +971,7 @@ class Utopia(object):
         logging.info( u'unsSearchByPk method call' )
         return self.send_request(data)
     #====================  
-    def unsSearchByNick(self,filter ): 
+    def unsSearchByNick(self, filter): 
         data={"jsonrpc": "2.0",
             "method":"unsSearchByNick",
             "params": {
@@ -954,7 +981,7 @@ class Utopia(object):
         logging.info( u'unsSearchByNick method call' )
         return self.send_request(data)
     #====================  
-    def getUnsSyncInfo(self ): 
+    def getUnsSyncInfo(self): 
         data={"jsonrpc": "2.0",
             "method":"getUnsSyncInfo",
             "params": {
@@ -964,7 +991,7 @@ class Utopia(object):
         logging.info( u'getUnsSyncInfo method call' )
         return self.send_request(data)
     #====================  
-    def unsRegisteredNames(self ): 
+    def unsRegisteredNames(self): 
         data={"jsonrpc": "2.0",
             "method":"unsRegisteredNames",
             "params": {
@@ -974,7 +1001,7 @@ class Utopia(object):
         logging.info( u'unsRegisteredNames method call' )
         return self.send_request(data)
     #====================  
-    def summaryUnsRegisteredNames(self,fromDate,toDate ): 
+    def summaryUnsRegisteredNames(self, fromDate, toDate): 
         data={"jsonrpc": "2.0",
             "method":"summaryUnsRegisteredNames",
             "params": {
@@ -985,7 +1012,7 @@ class Utopia(object):
         logging.info( u'summaryUnsRegisteredNames method call' )
         return self.send_request(data)
     #====================  
-    def getNetworkConnections(self ): 
+    def getNetworkConnections(self): 
         data={"jsonrpc": "2.0",
             "method":"getNetworkConnections",
             "params": {
@@ -995,7 +1022,7 @@ class Utopia(object):
         logging.info( u'getNetworkConnections method call' )
         return self.send_request(data)
     #====================  
-    def getProxyMappings(self ): 
+    def getProxyMappings(self): 
         data={"jsonrpc": "2.0",
             "method":"getProxyMappings",
             "params": {
@@ -1005,7 +1032,7 @@ class Utopia(object):
         logging.info( u'getProxyMappings method call' )
         return self.send_request(data)
     #====================  
-    def createProxyMapping(self,srcHost,srcPort,dstHost,dstPort,enabled ): 
+    def createProxyMapping(self, srcHost, srcPort, dstHost, dstPort, enabled): 
         data={"jsonrpc": "2.0",
             "method":"createProxyMapping",
             "params": {
@@ -1019,7 +1046,7 @@ class Utopia(object):
         logging.info( u'createProxyMapping method call' )
         return self.send_request(data)
     #====================  
-    def enableProxyMapping(self,mappingId ): 
+    def enableProxyMapping(self, mappingId): 
         data={"jsonrpc": "2.0",
             "method":"enableProxyMapping",
             "params": {
@@ -1029,7 +1056,7 @@ class Utopia(object):
         logging.info( u'enableProxyMapping method call' )
         return self.send_request(data)
     #====================  
-    def disableProxyMapping(self,mappingId ): 
+    def disableProxyMapping(self, mappingId): 
         data={"jsonrpc": "2.0",
             "method":"disableProxyMapping",
             "params": {
@@ -1039,7 +1066,7 @@ class Utopia(object):
         logging.info( u'disableProxyMapping method call' )
         return self.send_request(data)
     #====================  
-    def removeProxyMapping(self,mappingId ): 
+    def removeProxyMapping(self, mappingId): 
         data={"jsonrpc": "2.0",
             "method":"removeProxyMapping",
             "params": {
@@ -1049,7 +1076,7 @@ class Utopia(object):
         logging.info( u'removeProxyMapping method call' )
         return self.send_request(data)
     #====================  
-    def lowTrafficMode(self ): 
+    def lowTrafficMode(self): 
         data={"jsonrpc": "2.0",
             "method":"lowTrafficMode",
             "params": {
@@ -1059,7 +1086,7 @@ class Utopia(object):
         logging.info( u'lowTrafficMode method call' )
         return self.send_request(data)
     #====================  
-    def setLowTrafficMode(self,enabled ): 
+    def setLowTrafficMode(self, enabled): 
         data={"jsonrpc": "2.0",
             "method":"setLowTrafficMode",
             "params": {
@@ -1069,7 +1096,7 @@ class Utopia(object):
         logging.info( u'setLowTrafficMode method call' )
         return self.send_request(data)
     #====================  
-    def getWhoIsInfo(self,owner ): 
+    def getWhoIsInfo(self, owner): 
         data={"jsonrpc": "2.0",
             "method":"getWhoIsInfo",
             "params": {
@@ -1079,7 +1106,7 @@ class Utopia(object):
         logging.info( u'getWhoIsInfo method call' )
         return self.send_request(data)
     #====================  
-    def requestTreasuryPoSRates(self ): 
+    def requestTreasuryPoSRates(self): 
         data={"jsonrpc": "2.0",
             "method":"requestTreasuryPoSRates",
             "params": {
@@ -1089,7 +1116,7 @@ class Utopia(object):
         logging.info( u'requestTreasuryPoSRates method call' )
         return self.send_request(data)
     #====================  
-    def getTreasuryPoSRates(self ): 
+    def getTreasuryPoSRates(self): 
         data={"jsonrpc": "2.0",
             "method":"getTreasuryPoSRates",
             "params": {
@@ -1099,7 +1126,7 @@ class Utopia(object):
         logging.info( u'getTreasuryPoSRates method call' )
         return self.send_request(data)
     #====================  
-    def requestTreasuryTransactionVolumes(self ): 
+    def requestTreasuryTransactionVolumes(self): 
         data={"jsonrpc": "2.0",
             "method":"requestTreasuryTransactionVolumes",
             "params": {
@@ -1109,7 +1136,7 @@ class Utopia(object):
         logging.info( u'requestTreasuryTransactionVolumes method call' )
         return self.send_request(data)
     #====================  
-    def getTreasuryTransactionVolumes(self ): 
+    def getTreasuryTransactionVolumes(self): 
         data={"jsonrpc": "2.0",
             "method":"getTreasuryTransactionVolumes",
             "params": {
@@ -1119,7 +1146,7 @@ class Utopia(object):
         logging.info( u'getTreasuryTransactionVolumes method call' )
         return self.send_request(data)
     #====================  
-    def ucodeEncode(self,hex_code,size_image,coder,format ): 
+    def ucodeEncode(self, hex_code, size_image, coder, format): 
         data={"jsonrpc": "2.0",
             "method":"ucodeEncode",
             "params": {
@@ -1132,7 +1159,7 @@ class Utopia(object):
         logging.info( u'ucodeEncode method call' )
         return self.send_request(data)
     #====================  
-    def ucodeDecode(self,base64_image ): 
+    def ucodeDecode(self, base64_image): 
         data={"jsonrpc": "2.0",
             "method":"ucodeDecode",
             "params": {
@@ -1142,7 +1169,7 @@ class Utopia(object):
         logging.info( u'ucodeDecode method call' )
         return self.send_request(data)
     #====================  
-    def getWebSocketState(self ): 
+    def getWebSocketState(self): 
         data={"jsonrpc": "2.0",
             "method":"getWebSocketState",
             "params": {
@@ -1152,7 +1179,7 @@ class Utopia(object):
         logging.info( u'getWebSocketState method call' )
         return self.send_request(data)
     #====================  
-    def setWebSocketState(self,enabled,port ): 
+    def setWebSocketState(self, enabled, port): 
         data={"jsonrpc": "2.0",
             "method":"setWebSocketState",
             "params": {
@@ -1163,7 +1190,7 @@ class Utopia(object):
         logging.info( u'setWebSocketState method call' )
         return self.send_request(data)
     #====================  
-    def clearTrayNotifications(self ): 
+    def clearTrayNotifications(self): 
         data={"jsonrpc": "2.0",
             "method":"clearTrayNotifications",
             "params": {
@@ -1173,7 +1200,7 @@ class Utopia(object):
         logging.info( u'clearTrayNotifications method call' )
         return self.send_request(data)
     #====================  
-    def getContactGroups(self ): 
+    def getContactGroups(self): 
         data={"jsonrpc": "2.0",
             "method":"getContactGroups",
             "params": {
@@ -1183,7 +1210,7 @@ class Utopia(object):
         logging.info( u'getContactGroups method call' )
         return self.send_request(data)
     #====================  
-    def getContactsByGroup(self,groupName ): 
+    def getContactsByGroup(self, groupName): 
         data={"jsonrpc": "2.0",
             "method":"getContactsByGroup",
             "params": {
@@ -1193,7 +1220,7 @@ class Utopia(object):
         logging.info( u'getContactsByGroup method call' )
         return self.send_request(data)
     #====================  
-    def renameContactGroup(self,oldGroupName,newGroupName ): 
+    def renameContactGroup(self, oldGroupName, newGroupName): 
         data={"jsonrpc": "2.0",
             "method":"renameContactGroup",
             "params": {
@@ -1204,7 +1231,7 @@ class Utopia(object):
         logging.info( u'renameContactGroup method call' )
         return self.send_request(data)
     #====================  
-    def deleteContactGroup(self,groupName ): 
+    def deleteContactGroup(self, groupName): 
         data={"jsonrpc": "2.0",
             "method":"deleteContactGroup",
             "params": {
@@ -1214,7 +1241,7 @@ class Utopia(object):
         logging.info( u'deleteContactGroup method call' )
         return self.send_request(data)
     #====================  
-    def getTransfersFromManager(self ): 
+    def getTransfersFromManager(self): 
         data={"jsonrpc": "2.0",
             "method":"getTransfersFromManager",
             "params": {
@@ -1224,7 +1251,7 @@ class Utopia(object):
         logging.info( u'getTransfersFromManager method call' )
         return self.send_request(data)
     #====================  
-    def getFilesFromManager(self ): 
+    def getFilesFromManager(self): 
         data={"jsonrpc": "2.0",
             "method":"getFilesFromManager",
             "params": {
@@ -1234,7 +1261,7 @@ class Utopia(object):
         logging.info( u'getFilesFromManager method call' )
         return self.send_request(data)
     #====================  
-    def abortTransfers(self,transferId ): 
+    def abortTransfers(self, transferId): 
         data={"jsonrpc": "2.0",
             "method":"abortTransfers",
             "params": {
@@ -1244,7 +1271,7 @@ class Utopia(object):
         logging.info( u'abortTransfers method call' )
         return self.send_request(data)
     #====================  
-    def hideTransfers(self,transferId ): 
+    def hideTransfers(self, transferId): 
         data={"jsonrpc": "2.0",
             "method":"hideTransfers",
             "params": {
@@ -1254,7 +1281,7 @@ class Utopia(object):
         logging.info( u'hideTransfers method call' )
         return self.send_request(data)
     #====================  
-    def getFile(self,fileId ): 
+    def getFile(self, fileId): 
         data={"jsonrpc": "2.0",
             "method":"getFile",
             "params": {
@@ -1264,7 +1291,7 @@ class Utopia(object):
         logging.info( u'getFile method call' )
         return self.send_request(data)
     #====================  
-    def deleteFile(self,fileId ): 
+    def deleteFile(self, fileId): 
         data={"jsonrpc": "2.0",
             "method":"deleteFile",
             "params": {
@@ -1274,7 +1301,7 @@ class Utopia(object):
         logging.info( u'deleteFile method call' )
         return self.send_request(data)
     #====================  
-    def sendFileByMessage(self,tohex,fileId ): 
+    def sendFileByMessage(self, tohex, fileId): 
         data={"jsonrpc": "2.0",
             "method":"sendFileByMessage",
             "params": {
@@ -1285,7 +1312,7 @@ class Utopia(object):
         logging.info( u'sendFileByMessage method call' )
         return self.send_request(data)
     #====================  
-    def getChannelBannedContacts(self,channelid ): 
+    def getChannelBannedContacts(self, channelid): 
         data={"jsonrpc": "2.0",
             "method":"getChannelBannedContacts",
             "params": {
@@ -1295,7 +1322,7 @@ class Utopia(object):
         logging.info( u'getChannelBannedContacts method call' )
         return self.send_request(data)
     #====================  
-    def applyChannelBannedContacts(self,channelid,newList ): 
+    def applyChannelBannedContacts(self, channelid, newList): 
         data={"jsonrpc": "2.0",
             "method":"applyChannelBannedContacts",
             "params": {
@@ -1306,7 +1333,7 @@ class Utopia(object):
         logging.info( u'applyChannelBannedContacts method call' )
         return self.send_request(data)
     #====================  
-    def uploadFile(self,fileDataBase64,fileName ): 
+    def uploadFile(self, fileDataBase64, fileName): 
         data={"jsonrpc": "2.0",
             "method":"uploadFile",
             "params": {
@@ -1315,4 +1342,15 @@ class Utopia(object):
             "filter": self.GENERICFILTER
         }
         logging.info( u'uploadFile method call' )
+        return self.send_request(data)
+    #====================  
+    def sendFileByMessage(self, tohex, fileId): 
+        data={"jsonrpc": "2.0",
+            "method":"sendFileByMessage",
+            "params": {
+                'to' : tohex,
+                'fileId' : fileId                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'sendFileByMessage method call' )
         return self.send_request(data)
