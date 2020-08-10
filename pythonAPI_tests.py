@@ -12,12 +12,18 @@ report_recipients = "31033EA6DD56AF6BD07B6DB4721A00BE9756084F2E76C17281FDDC57D73
 
 class MyTestResult(unittest.TestResult):
     def addFailure(self, test, err):
+        """При несоответствии текущего результата ожидаемому во время проверки Assert вызывается этот метод,
+        который пишет в файл отчёта имя теста и причину возникновения ошибки"""
+
         test_name = str(test).split(" ")[0]
         with open(report_file, "a") as f:
-            f.write(str(test_name) + ": Failed" + "; " + str(err[1]) + "\n")
+            f.write(str(test_name) + ": Failed: " + str(err[1]) + "\n")
         super(MyTestResult, self).addFailure(test, err)
 
     def addError(self, test, err):
+        """При возникновении исключения в тесте до проверки результата вызывается этот метод, который пишет в файл
+        отчёта имя теста и описание ошибки"""
+
         test_name = str(test).split(" ")[0]
         with open(report_file, "a") as f:
             f.write(str(test_name) + ": Error: " + str(err[1]) + "\n")
@@ -134,7 +140,7 @@ class AllApiMethodsTesting(unittest.TestCase):
         # Assertion
         AssertNotEmptyOrError(self, status, result)
 
-    def test_sendEmailMessage(self, contacts_pk: tuple = (CONTACT_PK,)) -> json:
+    def test_sendEmailMessage(self, contacts_pk: tuple = (CONTACT_PK,), attachId: str = "") -> json:
         """Method sendEmailMessage sends uMail to the selected contact in the Utopia network.
         The method is called by using the To parameter, which passes on the Public Key or Nickname
         to which the uMail would be sent (Public Key can be recognized by using the getContacts method);
@@ -145,7 +151,7 @@ class AllApiMethodsTesting(unittest.TestCase):
         body_text = "This is a Python api body"
         subject_text = "This is a Python api subject"
 
-        status, result = self.u.sendEmailMessage(contacts_pk, subject_text, body_text)
+        status, result = self.u.sendEmailMessage(contacts_pk, subject_text, body_text, attachId)
 
         # Assertion
         AssertNotEmptyOrError(self, status, result)
@@ -238,10 +244,10 @@ class AllApiMethodsTesting(unittest.TestCase):
             _, vouchers = self.u.getVouchers()
 
         # Action
-        self.status, result = self.u.useVoucher(vouchers[0]['voucherid'])
+        status, result = self.u.useVoucher(vouchers[0]['voucherid'])
 
         # Assertion
-        AssertResultIsRefNum(self, self.status, result)
+        AssertResultIsRefNum(self, status, result)
 
     def test_deleteVoucher(self, amount: int = 10) -> 'reference_number':
         """Method deleteVoucher allows to remove your own voucher from the existing list with having the amount
@@ -334,17 +340,20 @@ class AllApiMethodsTesting(unittest.TestCase):
         list of invoices with their detailed information. In response the declineInvoice method returns in the
         Response block the results of completing this request."""
 
-        invoice = None
+        invoiceid = ''
 
         # Action
         _, awaiting_requests = self.u.getFinanceHistory("AWAITING_REQUESTS", "", "", "", "", "", "")
+
         if len(awaiting_requests) < 5:
             _, invoice_ref_num = self.u.sendInvoice("API request", CONTACT_CARD, 10)
-            time.sleep(3)  # wait for network confirmation
+            time.sleep(4)  # wait for network confirmation
             _, invoice = self.u.getInvoiceByReferenceNumber(invoice_ref_num)
+            invoiceid = invoice['invoiceid']
         else:
-            invoice = awaiting_requests[0]
-        status, result = self.u.cancelInvoice(invoice["invoiceid"])
+            invoiceid = awaiting_requests[0]['id']
+
+        status, result = self.u.cancelInvoice(invoiceid)
         time.sleep(3)  # wait for network confirmation
 
         # Assertion
@@ -668,18 +677,20 @@ class AllApiMethodsTesting(unittest.TestCase):
         # SetUp
         subject = 'This is a Reply email by Python API test'
         body = 'This is a python api test'
+        attachId = ''
 
         # Action
         _, emails = self.u.getEmailFolder(1, "")
         if len(emails) > 0 and 'Error' not in emails:
-            status, result = self.u.sendReplyEmailMessage(emails[-1], body, subject)
+            status, result = self.u.sendReplyEmailMessage(emails[-1], body, subject, attachId)
         else:
             raise Exception("There is no emails, or got Error on request")
 
         # Assertion
         AssertNotEmptyOrError(self, status, result)
 
-    def test_sendForwardEmailMessage(self, recipient: str = CONTACT_PK, body: str = "", subject: str = "") -> json:
+    def test_sendForwardEmailMessage(self, recipient: str = CONTACT_PK, body: str = "", subject: str = "",
+                                     attachId: str = "") -> json:
         """Method sendForwardEmailMessage creates response email for an incoming email in uMail and sends it to the
         selected contact with the new message. The method is called by using the 'Id' parameter, which passes on the
         id of the email (id of the email can be found by using getEmailFolder method); 'To', which passes on the
@@ -694,7 +705,7 @@ class AllApiMethodsTesting(unittest.TestCase):
         # Action
         self.status, emails = self.u.getEmailFolder(1, "")
         if len(emails) > 0 and 'Error' not in emails:
-            status, result = self.u.sendForwardEmailMessage(emails[-1], recipient, body, subject)
+            status, result = self.u.sendForwardEmailMessage(emails[-1], recipient, body, subject, attachId)
         else:
             raise Exception("There is no emails, or got Error on request")
 
@@ -916,6 +927,7 @@ class AllApiMethodsTesting(unittest.TestCase):
 
         # Action
         _, cards = self.u.getCards()
+        status = ""
         result = ""
 
         if len(cards) > 0 and 'Error' not in cards:
@@ -926,12 +938,12 @@ class AllApiMethodsTesting(unittest.TestCase):
                 _, cards = self.u.getCards()
                 card = [card for card in cards if card['name'] == 'API card']
             try:
-                self.status, result = self.u.deleteCard(card[0]['cardid'])
+                status, result = self.u.deleteCard(card[0]['cardid'])
             except Exception as e:
                 print(e)
             finally:
                 # Assertion
-                AssertResultIsRefNum(self, self.status, result)
+                AssertResultIsRefNum(self, status, result)
 
     def test_getFinanceSystemInformation(self) -> json:
         """Method getFinanceSystemInformation returns in the Response field the information about Utopia financial
@@ -970,15 +982,15 @@ class AllApiMethodsTesting(unittest.TestCase):
         of turning on or off the operation is displayed."""
 
         # Prepare step
-        self.u.enablePoS('false')  # Switch off pos
-        time.sleep(3)  # wait for network response
+        s, res = self.u.enablePoS('false')  # Switch off pos
+        if res != "":
+            time.sleep(5)  # wait for network response
 
         # Action
         status, result = self.u.enablePoS(enabled)
-        time.sleep(3)  # wait for network response
 
         # Assertion
-        AssertResultIsTrue(self, status, result)
+        AssertResultIsRefNum(self, status, result)
 
     def test_enableHistoryMining(self, enabled: str = "true") -> bool:
         """Calling the enableHistoryMining method changes the option of the automatic reading of the mining history from
@@ -1129,13 +1141,17 @@ class AllApiMethodsTesting(unittest.TestCase):
         hide_in_ui = "false"
 
         # Action
-        status, myChannel = self.u.createChannel(channel_name, description, read_only, read_only_privacy, password,
-                                                      languages, hash_tags, geo_tag, avatar, hide_in_ui)
-        time.sleep(3)  # wait for uchan database sync ends
-        self.u.deleteChannel(myChannel, password)  # cleanup step
+        _, my_channels = self.u.getChannels(filter="", channel_type=2)
+        if len(my_channels) < 10:
+            status, myChannel = self.u.createChannel(channel_name, description, read_only, read_only_privacy, password,
+                                                     languages, hash_tags, geo_tag, avatar, hide_in_ui)
+            time.sleep(3)  # wait for uchan database sync ends
+            self.u.deleteChannel(myChannel, password)  # cleanup step
 
-        # Assertion
-        AssertNotEmptyOrError(self, status, myChannel)
+            # Assertion
+            AssertNotEmptyOrError(self, status, myChannel)
+        else:
+            raise Exception("There are 10 channels. Cant create more")
 
     def test_getOwnContact(self) -> json:
         """Method getOwnContact returns information about yourself."""
@@ -1291,15 +1307,16 @@ class AllApiMethodsTesting(unittest.TestCase):
             time.sleep(3)  # wait for uchan data base sync process ends
         else:
             myChannel = [channel["channelid"] for channel in my_channels if channel["name"] != "testing_dev"][0]
-        if myChannel != "":
-            status, result = self.u.modifyChannel(myChannel, "edited on:" + str(datetime.today()), password,
-                                                  languages, hash_tags, geo_tag, avatar, hide_in_ui)
+        if myChannel:
+            status, result = self.u.modifyChannel(myChannel, "edited on:" + str(datetime.today()), read_only,
+                                                  read_only_privacy, password, languages, hash_tags, geo_tag, avatar,
+                                                  hide_in_ui)
         else:
             raise Exception("Cant choose channel for modify")
         self.u.deleteChannel(myChannel, password)  # cleanup step
 
         # Assertion
-        AssertResultIsRefNum(self, status, result)
+        AssertResultIsTrue(self, status, result)
 
     # @unittest.skip("просьба не трогать ушан")
     def test_deleteChannel(self) -> 'reference_number':
@@ -1587,7 +1604,7 @@ class AllApiMethodsTesting(unittest.TestCase):
         ids = [{"mail_id": umail['id'], "attach_id": attach['id']}
                for umail in all_incoming_umails if 'attachments' in umail.keys()
                for attach in umail['attachments'] if 'waiting' in attach.values()]
-        print(ids)
+
         try:
             status, result = self.u.acceptAttachment(ids[0]["mail_id"], ids[0]["attach_id"])
             AssertResultIsTrue(self, status, result)
@@ -1614,13 +1631,117 @@ class AllApiMethodsTesting(unittest.TestCase):
         except:
             raise Exception("There is no incoming emails with attachments in status waiting")
 
+    def test_pinInstantMessage(self) -> bool:
+        """Тест проверяет возможность закрепить сообщение в чате с контактом"""
+
+        # Action
+        _, contact_messages = self.u.getContactMessages(CONTACT_PK)
+        _, pinned_messages = self.u.getPinnedMessages(CONTACT_PK)
+
+        for msg in contact_messages:
+            if msg not in pinned_messages and msg['messageType'] != 6:
+                status, result = self.u.pinInstantMessage(CONTACT_PK, msg['id'], 'true')
+                AssertResultIsTrue(self, status, result)
+                break
+
+    def test_UnPinInstantMessage(self) -> bool:
+        """Тест проверяет возможность открепить сообщение в чате с контактом"""
+
+        # Setup
+        status = ''
+        result = ''
+
+        # Action
+        _, contact_messages = self.u.getContactMessages(CONTACT_PK)
+        _, pinned_messages = self.u.getPinnedMessages(CONTACT_PK)
+
+        if len(pinned_messages) == 0:
+            for msg in contact_messages:
+                if msg not in pinned_messages and msg['messageType'] != 6:
+                    self.u.pinInstantMessage(CONTACT_PK, msg['id'], 'true')
+                    break
+
+        _, pinned_messages = self.u.getPinnedMessages(CONTACT_PK)
+
+        for msg in pinned_messages:
+            status, result = self.u.pinInstantMessage(CONTACT_PK, msg['id'], 'false')
+            AssertResultIsTrue(self, status, result)
+
+    def test_sendEmailInvitation(self) -> bool:
+        """Тест проверят возможность отправки инвайта письмом"""
+
+        # Action
+        status, result = self.u.sendEmailInvitation(CHANNEL_ID, CONTACT_PK, 'This is description', 'This is comment')
+
+        # Assertion
+        AssertResultIsTrue(self, status, result)
+
+    def test_emptyEmailsTrash(self) -> bool:
+        """Тест проверят возможность очистки корзины в списке писем"""
+
+        # Action
+        status, result = self.u.emptyEmailsTrash()
+
+        # Assertion
+        AssertResultIsTrue(self, status, result)
+
+    def test_setChannelAsBookmarked(self) -> bool:
+        """Тест проверяет возможность добвления канала в закладки"""
+
+        # Setup
+        status = ''
+        result = ''
+        channel_in = False
+
+        # Action
+        _, bookmarked_channels = self.u.getChannels(filter="", channel_type=4)  # Get my bookmarked channels
+
+        for channel in bookmarked_channels:
+            if channel['channelid'] == CHANNEL_ID:
+                channel_in = True
+
+        if channel_in:
+            status, result = self.u.setChannelAsBookmarked(CHANNEL_ID, "false")
+        else:
+            status, result = self.u.setChannelAsBookmarked(CHANNEL_ID, "true")
+
+        # Assertion
+        AssertResultIsTrue(self, status, result)
+
+    def test_getSettingInfo(self) -> json:
+        """Тест проверяет корректность возвращаемых данных о настройках методом getSettingInfo"""
+
+        # Action
+        status, result = self.u.getSettingInfo(settingId='')
+
+        # Assertion
+        AssertNotEmptyOrError(self, status, result)
+
+    def test_setSettingInfo(self) -> bool:
+        """Тест проверяет возможность установки настроек"""
+
+        # Action
+        status, result = self.u.setSettingInfo(settingId='TrayIconMode', newValue='Always')
+
+        # Assertion
+        AssertResultIsTrue(self, status, result)
+
+    def test_getReleaseNotes(self):
+        """Тест проверяет возможность получения информации Release Notes"""
+
+        # Action
+        status, result = self.u.getReleaseNotes()
+
+        # Assertion
+        AssertResultIsNotEmpty(self, status, result)
+
     @classmethod
     def tearDownClass(cls):
         report = ""
         with open(report_file, "r") as f:
             for row in f:
                 report = report + "\n" + str(row)
-        cls.u.sendEmailMessage(report_recipients, "Test Failures Report", report)
+        cls.u.sendEmailMessage(report_recipients, "Test Failures Report", report, "")
 
 
 if __name__ == "__main__":
