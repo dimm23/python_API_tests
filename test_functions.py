@@ -8,7 +8,7 @@ def AssertNotEmptyOrError(status, result):
     """Ожидание что result, возвращаемый вызовом метода, не пустой и не содержит слово Error"""
 
     assert status, "Status or request: " + str(status) + "; Result: " + str(result)
-    assert result != "" and result != 0, "Failed of request execution: empty result"
+    assert result != "" and str(result) != "0", "Failed of request execution: empty result"
     assert "Error" not in str(result), "Error: " + str(result)
 
 
@@ -31,17 +31,22 @@ def AssertResultIsTrue(status, result):
 def AssertResultIsNotEmpty(status, result):
     """Ожиданое что result не пустой"""
     assert status, "Status or request: " + str(status) + "; Result: " + str(result)
-    assert result != "", "Failed of request execution: empty result"
+    assert result != "" and str(result) != "0", "Failed of request execution: empty result"
 
 
 def AssertErrorInResult(status, result):
     """Ожидание что в result будет слово Error"""
     assert status, "Status or request: " + str(status) + "; Result: " + str(result)
-    assert 'Error' in result, "Operation without errors"
+    assert 'Error' in result, "Operation with errors"
 
 
 def AssertResultIsZero(status, result):
     """Ожидание того что результат равен нулю"""
     assert status, "Status or request: " + str(status) + "; Result: " + str(result)
-    assert result == 0, "Operation without errors"
+    assert str(result) == "0", "Operation without errors"
 
+
+def AssertUnableToExecute(status, result):
+    """Ожидание что status будет False а result будет содержать текст Unable to execute api request"""
+    assert status is False
+    assert "Unable to execute api request" in result

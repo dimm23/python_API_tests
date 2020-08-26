@@ -98,6 +98,37 @@ class Utopia(object):
         logging.info( u'setProfileStatus method call' )
         return self.send_request(data)
     #====================  
+    def getReleaseNotes(self): 
+        data={"jsonrpc": "2.0",
+            "method":"getReleaseNotes",
+            "params": {
+                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'getReleaseNotes method call' )
+        return self.send_request(data)
+    #====================  
+    def getSettingInfo(self, settingId): 
+        data={"jsonrpc": "2.0",
+            "method":"getSettingInfo",
+            "params": {
+                'settingId' : settingId                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'getSettingInfo method call' )
+        return self.send_request(data)
+    #====================  
+    def setSettingInfo(self, settingId, newValue): 
+        data={"jsonrpc": "2.0",
+            "method":"setSettingInfo",
+            "params": {
+                'settingId' : settingId,
+                'newValue' : newValue                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'setSettingInfo method call' )
+        return self.send_request(data)
+    #====================  
     def getOwnContact(self): 
         data={"jsonrpc": "2.0",
             "method":"getOwnContact",
@@ -185,6 +216,39 @@ class Utopia(object):
             "filter": self.GENERICFILTER
         }
         logging.info( u'sendInstantQuote method call' )
+        return self.send_request(data)
+    #====================  
+    def pinInstantMessage(self, tohex, messageId, pin): 
+        data={"jsonrpc": "2.0",
+            "method":"pinInstantMessage",
+            "params": {
+                'to' : tohex,
+                'messageId' : messageId,
+                'pin' : pin                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'pinInstantMessage method call' )
+        return self.send_request(data)
+    #====================  
+    def bookmarkInstantMessage(self, messageId, comments): 
+        data={"jsonrpc": "2.0",
+            "method":"bookmarkInstantMessage",
+            "params": {
+                'messageId' : messageId,
+                'comments' : comments                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'bookmarkInstantMessage method call' )
+        return self.send_request(data)
+    #====================  
+    def getPinnedMessages(self, pk): 
+        data={"jsonrpc": "2.0",
+            "method":"getPinnedMessages",
+            "params": {
+                'pk' : pk                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'getPinnedMessages method call' )
         return self.send_request(data)
     #====================  
     def getStickerCollections(self): 
@@ -345,6 +409,26 @@ class Utopia(object):
         logging.info( u'acceptAttachment method call' )
         return self.send_request(data)
     #====================  
+    def acceptFileMessage(self, messageId): 
+        data={"jsonrpc": "2.0",
+            "method":"acceptFileMessage",
+            "params": {
+                'messageId' : messageId                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'acceptFileMessage method call' )
+        return self.send_request(data)
+    #====================  
+    def abortFileMessage(self, messageId): 
+        data={"jsonrpc": "2.0",
+            "method":"abortFileMessage",
+            "params": {
+                'messageId' : messageId                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'abortFileMessage method call' )
+        return self.send_request(data)
+    #====================  
     def getEmailById(self, id): 
         data={"jsonrpc": "2.0",
             "method":"getEmailById",
@@ -390,6 +474,29 @@ class Utopia(object):
             "filter": self.GENERICFILTER
         }
         logging.info( u'sendForwardEmailMessage method call' )
+        return self.send_request(data)
+    #====================  
+    def sendEmailInvitation(self, channelid, tohex, description, comments): 
+        data={"jsonrpc": "2.0",
+            "method":"sendEmailInvitation",
+            "params": {
+                'channelid' : channelid,
+                'to' : tohex,
+                'description' : description,
+                'comments' : comments                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'sendEmailInvitation method call' )
+        return self.send_request(data)
+    #====================  
+    def emptyEmailsTrash(self): 
+        data={"jsonrpc": "2.0",
+            "method":"emptyEmailsTrash",
+            "params": {
+                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'emptyEmailsTrash method call' )
         return self.send_request(data)
     #====================  
     def getFinanceSystemInformation(self): 
@@ -789,6 +896,17 @@ class Utopia(object):
             "filter": self.GENERICFILTER
         }
         logging.info( u'leaveChannel method call' )
+        return self.send_request(data)
+    #====================  
+    def setChannelAsBookmarked(self, channelid, bookmarked): 
+        data={"jsonrpc": "2.0",
+            "method":"setChannelAsBookmarked",
+            "params": {
+                'channelid' : channelid,
+                'bookmarked' : bookmarked                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'setChannelAsBookmarked method call' )
         return self.send_request(data)
     #====================  
     def getChannelContacts(self, channelid): 
@@ -1344,13 +1462,36 @@ class Utopia(object):
         logging.info( u'uploadFile method call' )
         return self.send_request(data)
     #====================  
-    def sendFileByMessage(self, tohex, fileId): 
+    def sendChannelQuote(self, channelid, text, id_message): 
         data={"jsonrpc": "2.0",
-            "method":"sendFileByMessage",
+            "method":"sendChannelQuote",
             "params": {
-                'to' : tohex,
-                'fileId' : fileId                },
+                'channelid' : channelid,
+                'text' : text,
+                'id_message' : id_message                },
             "filter": self.GENERICFILTER
         }
-        logging.info( u'sendFileByMessage method call' )
+        logging.info( u'sendChannelQuote method call' )
+        return self.send_request(data)
+    #====================  
+    def removeChannelMessage(self, channelid, id_message): 
+        data={"jsonrpc": "2.0",
+            "method":"removeChannelMessage",
+            "params": {
+                'channelid' : channelid,
+                'id_message' : id_message                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'removeChannelMessage method call' )
+        return self.send_request(data)
+    #====================  
+    def enableChannelNotification(self, channelid, enabled): 
+        data={"jsonrpc": "2.0",
+            "method":"enableChannelNotification",
+            "params": {
+                'channelid' : channelid,
+                'enabled' : enabled                },
+            "filter": self.GENERICFILTER
+        }
+        logging.info( u'enableChannelNotification method call' )
         return self.send_request(data)
