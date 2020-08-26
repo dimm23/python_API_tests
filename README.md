@@ -6,4 +6,9 @@ REST API autotests
 
 В test_functions я вынес практически все assert-ы
 
-...
+В settings - тестовые данные.
+
+prepare - подготовительный скрипт, который до начала запуска всех апи тестов запускается на стороне контакта
+
+channel_join_left, channel_spamer, ws_ping - вспомогательные тестовые скрипты
+
